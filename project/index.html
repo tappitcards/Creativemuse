@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Creative Muse Marketing — Canadian Roots · Dubai Operated</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#0D0D0D;color:#0D0D0D;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+:root{
+  --ink:#0D0D0D;--ink-2:#3A3832;--ink-3:#7A7670;
+  --cream:#F5F0E8;--cream-2:#EDE8DC;--cream-3:#E3DDD0;
+  --gold:#C9A84C;--gold-light:#DFB95E;--gold-dim:rgba(201,168,76,0.15);
+  --navy:#1A2244;--navy-2:#2D3350;
+  --dark:#0D0D0D;--dark-2:#111111;--dark-3:#161616;
+  --white:#FFFFFF;
+  --r:10px;--r-lg:16px;--r-xl:24px;
+}
+
+h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif}
+
+/* ── WORDMARK ── */
+.logo-mark{display:flex;flex-direction:column;gap:0;line-height:1;text-decoration:none;cursor:pointer}
+.logo-mark-top{font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;font-weight:600;color:var(--white);letter-spacing:-0.5px;line-height:1}
+.logo-mark-top em{font-style:italic;color:var(--gold);font-weight:300}
+.logo-mark-bottom{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:400;color:rgba(255,255,255,0.4);letter-spacing:3.5px;text-transform:uppercase;margin-top:3px}
+
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:28px 72px;
+  transition:background .5s,box-shadow .5s,padding .5s;
+}
+.nav.solid{
+  background:rgba(10,10,10,0.92);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:0 1px 0 rgba(255,255,255,0.05);
+  padding:18px 72px;
+}
+.nav-links{display:flex;align-items:center;gap:40px;list-style:none}
+.nav-links a{font-size:13px;font-weight:400;color:rgba(255,255,255,0.55);text-decoration:none;letter-spacing:0.5px;transition:color .25s;cursor:pointer}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{
+  padding:10px 26px;background:transparent;
+  border:1px solid rgba(201,168,76,0.6);color:var(--gold)!important;
+  border-radius:100px;font-size:12px!important;font-weight:500!important;
+  letter-spacing:1px;text-transform:uppercase;transition:all .25s!important;cursor:pointer;
+}
+.nav-cta:hover{background:var(--gold)!important;color:var(--dark)!important;border-color:var(--gold)!important}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;border:none;background:transparent;border-radius:4px}
+.nav-hamburger span{display:block;width:24px;height:1px;background:var(--white);transition:all .3s}
+
+/* ── MOBILE MENU ── */
+.mobile-overlay{
+  position:fixed;inset:0;z-index:99;
+  background:rgba(10,10,10,0.98);backdrop-filter:blur(24px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+}
+.mobile-overlay a{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:rgba(255,255,255,0.7);text-decoration:none;letter-spacing:-0.5px;transition:color .2s;cursor:pointer}
+.mobile-overlay a:hover{color:var(--gold)}
+.mobile-overlay .m-cta{margin-top:12px;padding:14px 44px;border:1px solid rgba(201,168,76,0.5);color:var(--gold);border-radius:100px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;transition:all .25s}
+.mobile-overlay .m-cta:hover{background:var(--gold);color:var(--dark)}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;background:var(--dark);position:relative;
+  display:grid;grid-template-columns:1fr 1fr;align-items:center;
+  padding:0 72px;overflow:hidden;
+}
+.hero-noise{position:absolute;inset:0;opacity:.3;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+.hero-grad{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 55% 70% at 80% 50%,rgba(201,168,76,0.06) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 5% 80%,rgba(26,34,68,0.4) 0%,transparent 55%)}
+.hero-left{position:relative;z-index:2;padding:140px 0 100px}
+.hero-right{position:relative;z-index:2;display:flex;align-items:center;justify-content:flex-end;padding:140px 0 100px}
+.hero-eyebrow{font-size:10px;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:36px;display:flex;align-items:center;gap:14px}
+.hero-eyebrow::before{content:'';display:block;width:40px;height:1px;background:var(--gold);opacity:.5}
+.hero h1{font-size:clamp(56px,6vw,92px);font-weight:300;line-height:.92;letter-spacing:-2.5px;color:var(--white);margin-bottom:36px}
+.hero h1 em{font-style:italic;color:var(--gold);font-weight:300}
+.hero h1 strong{font-weight:700;display:block}
+.hero-sub{font-size:17px;font-weight:300;line-height:1.75;color:rgba(255,255,255,0.45);max-width:440px;margin-bottom:52px}
+.hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:80px}
+.hero-stats{display:flex;align-items:flex-start;gap:52px;padding-top:44px;border-top:1px solid rgba(255,255,255,0.07);flex-wrap:wrap}
+.hero-stat-num{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:var(--white);line-height:1;letter-spacing:-1px;margin-bottom:5px}
+.hero-stat-label{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1px;text-transform:uppercase}
+.hero-stat-div{width:1px;height:44px;background:rgba(255,255,255,0.07);align-self:center}
+
+/* Hero result cards */
+.hero-cards{position:relative;width:100%;max-width:380px}
+.result-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-xl);
+  padding:24px 28px;
+  backdrop-filter:blur(12px);
+}
+.result-card-label{font-size:10px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:10px}
+.result-card-value{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;color:var(--white);letter-spacing:-1px;line-height:1}
+.result-card-value span{color:var(--gold)}
+.result-card-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-top:6px;line-height:1.5}
+.result-card-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);margin-bottom:4px}
+.hero-card-line{width:1px;height:60px;background:linear-gradient(to bottom,rgba(201,168,76,0.3),transparent);margin:0 auto}
+
+/* ── BUTTONS ── */
+.btn-gold{padding:16px 40px;background:var(--gold);color:var(--dark);border-radius:100px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.5px;text-decoration:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn-ghost{padding:15px 40px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);border-radius:100px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:border-color .3s,color .3s}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.4);color:var(--white)}
+
+/* ── SECTION SHARED ── */
+.eyebrow{font-size:10px;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:'';display:block;width:28px;height:1px;background:var(--gold);opacity:.5}
+h2.sec-title{font-size:clamp(38px,4vw,60px);font-weight:300;line-height:1.02;letter-spacing:-1.8px;color:var(--ink);margin-bottom:20px}
+h2.sec-title.light{color:var(--white)}
+h2.sec-title em{font-style:italic;color:var(--gold);font-weight:300}
+.sec-sub{font-size:16px;font-weight:300;line-height:1.8;color:var(--ink-2);max-width:520px}
+.sec-sub.light{color:rgba(255,255,255,0.45)}
+.gold-rule{width:40px;height:1px;background:var(--gold);margin:28px 0;opacity:0.8}
+
+/* ── SECTION TRANSITIONS ── */
+.section-fade-dark{
+  position:relative;
+  background:var(--dark-2);
+}
+.section-fade-dark::before{
+  content:'';position:absolute;top:-80px;left:0;right:0;height:80px;
+  background:linear-gradient(to bottom,transparent,var(--dark-2));
+  pointer-events:none;z-index:1;
+}
+.section-fade-cream{
+  position:relative;
+  background:var(--cream);
+}
+.section-fade-cream::before{
+  content:'';position:absolute;top:-80px;left:0;right:0;height:80px;
+  background:linear-gradient(to bottom,transparent,var(--cream));
+  pointer-events:none;z-index:1;
+}
+.section-fade-navy{
+  position:relative;
+  background:var(--navy);
+}
+.section-fade-navy::before{
+  content:'';position:absolute;top:-80px;left:0;right:0;height:80px;
+  background:linear-gradient(to bottom,transparent,var(--navy));
+  pointer-events:none;z-index:1;
+}
+
+/* ── ABOUT ── */
+.about{background:var(--cream);padding:140px 72px}
+.about-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:120px;align-items:start}
+.about-cards{display:flex;flex-direction:column;gap:16px}
+.about-card{
+  padding:32px 36px;
+  background:var(--dark-3);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--r-xl);position:relative;cursor:default;
+  transition:border-color .4s;
+}
+.about-card:hover{border-color:rgba(201,168,76,0.3)}
+.about-card-icon{margin-bottom:16px;color:var(--gold)}
+.about-card-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--white);margin-bottom:10px;letter-spacing:-0.3px}
+.about-card-body{font-size:13px;line-height:1.75;color:rgba(255,255,255,0.4);font-weight:300}
+.about-card-flag{position:absolute;top:32px;right:32px;font-size:16px;opacity:.7}
+.about-narrative{font-size:17px;line-height:1.9;color:var(--ink-2);font-weight:300}
+.about-narrative p+p{margin-top:20px}
+.about-narrative .lead{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;line-height:1.35;color:var(--ink);letter-spacing:-0.5px;margin-bottom:28px;font-style:italic}
+
+/* ── SERVICES ── */
+.services{background:var(--dark);padding:140px 72px}
+.services-inner{max-width:1200px;margin:0 auto}
+.services-header{margin-bottom:72px}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.srv-card{
+  background:rgba(255,255,255,0.025);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--r-xl);padding:36px 32px;position:relative;overflow:hidden;cursor:default;
+}
+.srv-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.6),transparent);opacity:0;transition:opacity .4s}
+.srv-card:hover::after{opacity:1}
+.srv-num{font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(255,255,255,0.15);letter-spacing:2px;margin-bottom:24px}
+.srv-icon{margin-bottom:16px;color:var(--gold)}
+.srv-card h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--white);margin-bottom:12px;letter-spacing:-0.3px;line-height:1.15}
+.srv-card p{font-size:13px;line-height:1.75;color:rgba(255,255,255,0.38);font-weight:300}
+.srv-tag{display:inline-block;margin-top:20px;font-size:9px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);opacity:.6}
+
+/* ── CASE STUDIES (clients) ── */
+.case-study{padding:120px 72px;position:relative;overflow:hidden}
+.case-study.dark{background:var(--dark-3)}
+.case-study.cream{background:var(--cream)}
+.case-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.case-inner.reverse{direction:rtl}
+.case-inner.reverse > *{direction:ltr}
+.case-img-wrap{position:relative}
+.case-img{
+  width:100%;aspect-ratio:4/5;object-fit:cover;
+  border-radius:var(--r-xl);display:block;
+}
+.case-img-bracket{
+  position:absolute;width:48px;height:48px;
+  border-color:var(--gold);border-style:solid;opacity:.35;
+}
+.case-img-bracket.tl{top:-12px;left:-12px;border-width:1px 0 0 1px}
+.case-img-bracket.br{bottom:-12px;right:-12px;border-width:0 1px 1px 0}
+.case-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(201,168,76,0.25);border-radius:100px;margin-bottom:20px}
+.case-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.case-badge-text{font-size:10px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
+.case-title{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,56px);font-weight:600;letter-spacing:-1.5px;line-height:1.02;margin-bottom:10px}
+.case-title.light{color:var(--white)}
+.case-title.dark-txt{color:var(--ink)}
+.case-tagline{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;font-weight:300;color:var(--gold);margin-bottom:24px;letter-spacing:-0.3px}
+.case-desc{font-size:15px;line-height:1.8;font-weight:300;margin-bottom:32px}
+.case-desc.light{color:rgba(255,255,255,0.5)}
+.case-desc.dark-txt{color:var(--ink-2)}
+.case-offerings-label{font-size:10px;font-weight:400;letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.case-offerings-label.light{color:rgba(255,255,255,0.3)}
+.case-offerings-label.dark-txt{color:var(--ink-3)}
+.case-offerings{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.case-offerings li{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:300}
+.case-offerings li.light{color:rgba(255,255,255,0.65)}
+.case-offerings li.dark-txt{color:var(--ink-2)}
+.case-offerings li::before{content:'';display:block;width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.btn-outline-dark{display:inline-flex;align-items:center;gap:8px;padding:13px 32px;border:1px solid rgba(0,0,0,0.2);color:var(--ink);background:transparent;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;text-decoration:none;cursor:pointer;transition:all .25s}
+.btn-outline-dark:hover{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.btn-outline-light{display:inline-flex;align-items:center;gap:8px;padding:13px 32px;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);background:transparent;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;text-decoration:none;cursor:pointer;transition:all .25s}
+.btn-outline-light:hover{background:var(--gold);color:var(--dark);border-color:var(--gold)}
+.case-nda{padding:40px 72px;text-align:center;background:var(--dark);font-size:13px;color:rgba(255,255,255,0.2);font-style:italic;letter-spacing:0.3px}
+
+/* ── SEO AUDIT ── */
+.seo-audit{background:var(--dark-2);padding:140px 72px;position:relative;overflow:hidden}
+.seo-audit::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none}
+.seo-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+.seo-features{display:flex;flex-direction:column;gap:28px;margin-top:40px}
+.seo-feat{display:flex;align-items:flex-start;gap:18px}
+.seo-feat-icon{color:var(--gold);margin-top:2px;flex-shrink:0;opacity:.8}
+.seo-feat-title{font-size:15px;font-weight:500;color:var(--white);margin-bottom:4px}
+.seo-feat-desc{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.65}
+.seo-form-box{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r-xl);padding:48px 44px}
+.seo-form-box h3{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;color:var(--white);margin-bottom:6px;letter-spacing:-0.8px}
+.form-sub{font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:36px;line-height:1.65}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:8px}
+.field input,.field textarea,.field select{width:100%;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color .25s}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,0.18)}
+.field input:focus,.field textarea:focus{border-color:rgba(201,168,76,0.5)}
+.field input.error,.field textarea.error{border-color:rgba(224,82,82,0.6)}
+.field textarea{resize:vertical;min-height:100px;line-height:1.6}
+.form-note{font-size:11px;color:rgba(255,255,255,0.2);margin-top:14px;text-align:center;line-height:1.65}
+.form-success{text-align:center;padding:40px 0;color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;letter-spacing:-0.5px;line-height:1.5}
+
+/* ── NEWSLETTER ── */
+.newsletter{background:var(--cream);padding:120px 72px}
+.newsletter-inner{max-width:600px;margin:0 auto;text-align:center}
+.nl-form{display:flex;margin-top:44px;border:1px solid var(--cream-3);border-radius:100px;background:var(--white);overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,0.06)}
+.nl-form input{flex:1;padding:18px 28px;background:transparent;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);min-width:0}
+.nl-form input::placeholder{color:var(--ink-3)}
+.nl-form button{padding:14px 32px;background:var(--navy);color:var(--white);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.3px;border-radius:100px;margin:4px;transition:background .25s;white-space:nowrap}
+.nl-form button:hover{background:var(--ink)}
+.nl-note{font-size:12px;color:var(--ink-3);margin-top:18px;letter-spacing:0.2px}
+
+/* ── REVIEWS ── */
+.reviews{background:var(--dark);padding:140px 72px}
+.reviews-inner{max-width:1200px;margin:0 auto}
+.reviews-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:64px;flex-wrap:wrap;gap:20px}
+.clutch-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:100px;font-size:12px;color:rgba(255,255,255,0.45)}
+.clutch-stars{color:#FF3D2E;letter-spacing:2px;font-size:13px}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}
+.rev-card{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:var(--r-xl);padding:36px 32px;cursor:default}
+.rev-stars{color:#FF3D2E;font-size:13px;letter-spacing:2px;margin-bottom:20px}
+.rev-text{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;font-style:italic;line-height:1.65;color:rgba(255,255,255,0.75);margin-bottom:28px}
+.rev-author{display:flex;align-items:center;gap:14px}
+.rev-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--white);flex-shrink:0}
+.rev-name{font-size:14px;font-weight:500;color:var(--white)}
+.rev-co{font-size:12px;color:rgba(255,255,255,0.3);margin-top:2px}
+.reviews-cta{text-align:center}
+.btn-outline-gold{display:inline-flex;align-items:center;gap:8px;padding:14px 36px;border:1px solid rgba(201,168,76,0.4);color:var(--gold);background:transparent;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:0.5px;text-decoration:none;cursor:pointer;transition:all .3s}
+.btn-outline-gold:hover{background:var(--gold);color:var(--dark);border-color:var(--gold)}
+
+/* ── CONTACT ── */
+.contact{background:var(--navy);padding:140px 72px;position:relative;overflow:hidden}
+.contact::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 80% at 85% 50%,rgba(201,168,76,0.07) 0%,transparent 55%);pointer-events:none}
+.contact-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:start;position:relative;z-index:1}
+.contact-detail{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px}
+.contact-detail-icon{color:var(--gold);margin-top:2px;flex-shrink:0;opacity:.8}
+.contact-detail-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:5px}
+.contact-detail-val{font-size:15px;color:rgba(255,255,255,0.7)}
+.contact-detail-val a{color:rgba(255,255,255,0.7);text-decoration:none;transition:color .2s}
+.contact-detail-val a:hover{color:var(--gold)}
+.contact-form-box{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-xl);padding:48px 44px}
+.contact-form-box h3{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:400;color:var(--white);margin-bottom:32px;letter-spacing:-0.8px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);padding:72px 72px 44px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;padding-bottom:52px;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:36px}
+.footer-tagline{font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:18px}
+.footer-desc{font-size:13px;color:rgba(255,255,255,0.28);line-height:1.75;font-weight:300;max-width:240px}
+.footer-entity{display:inline-block;margin-top:20px;font-size:9px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.18);padding:5px 14px;border-radius:4px}
+.footer-col h4{font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:22px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:13px}
+.footer-col ul a{font-size:13px;color:rgba(255,255,255,0.35);text-decoration:none;transition:color .2s;cursor:pointer}
+.footer-col ul a:hover{color:rgba(255,255,255,0.75)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.footer-copy{font-size:11px;color:rgba(255,255,255,0.18);letter-spacing:0.3px}
+.footer-socials{display:flex;gap:14px}
+.footer-social-link{width:36px;height:36px;border:1px solid rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.35);text-decoration:none;transition:all .25s;cursor:pointer}
+.footer-social-link:hover{border-color:var(--gold);color:var(--gold)}
+.footer-legal{display:flex;gap:24px}
+.footer-legal a{font-size:11px;color:rgba(255,255,255,0.18);text-decoration:none;transition:color .2s;cursor:pointer}
+.footer-legal a:hover{color:rgba(255,255,255,0.5)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .nav{padding:20px 36px}.nav.solid{padding:15px 36px}
+  .hero{grid-template-columns:1fr;padding:0 36px}
+  .hero-right{display:none}
+  .hero-left{padding:130px 0 80px}
+  .about,.services,.seo-audit,.newsletter,.reviews,.contact{padding-left:36px;padding-right:36px}
+  .case-study{padding:100px 36px}
+  .case-nda{padding:32px 36px}
+  footer{padding-left:36px;padding-right:36px}
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .seo-inner{grid-template-columns:1fr;gap:64px}
+  .contact-inner{grid-template-columns:1fr;gap:64px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px}
+  .about-inner{gap:64px}
+}
+@media(max-width:768px){
+  .nav{padding:18px 24px}.nav.solid{padding:14px 24px}
+  .nav-links{display:none}.nav-hamburger{display:flex}
+  .hero,.about,.services,.seo-audit,.reviews,.contact{padding-left:24px;padding-right:24px}
+  .case-study{padding:80px 24px}
+  .case-nda{padding:28px 24px}
+  .newsletter,footer{padding-left:24px;padding-right:24px}
+  .about-inner{grid-template-columns:1fr;gap:52px}
+  .services-grid{grid-template-columns:1fr}
+  .case-inner,.case-inner.reverse{grid-template-columns:1fr;direction:ltr}
+  .reviews-grid{grid-template-columns:1fr}
+  .reviews-header{flex-direction:column;align-items:flex-start}
+  .footer-top{grid-template-columns:1fr;gap:36px}
+  .footer-bottom{flex-direction:column;align-items:flex-start;gap:18px}
+  .nl-form{flex-direction:column;border-radius:var(--r-lg);padding:8px}
+  .nl-form input{padding:14px 16px}
+  .nl-form button{width:100%;justify-content:center;margin:0;border-radius:var(--r)}
+  .hero-stat-div{display:none}.hero-stats{gap:28px}
+  .field-row{grid-template-columns:1fr}
+  .seo-form-box,.contact-form-box{padding:32px 24px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const { motion, AnimatePresence, useScroll, useTransform } = Motion;
+
+/* ── EASING ── */
+const ease = [0.16, 1, 0.3, 1];
+const easeSlow = [0.22, 1, 0.36, 1];
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 36 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.9, ease } }
+};
+const fadeIn = {
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { duration: 0.8 } }
+};
+const stagger = (s = 0.1, d = 0) => ({
+  hidden: {},
+  show: { transition: { staggerChildren: s, delayChildren: d } }
+});
+const cardV = {
+  hidden: { opacity: 0, y: 28 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.75, ease } }
+};
+
+/* ── ICONS ── */
+const I = {
+  brain:    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>,
+  search:   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
+  globe:    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+  phone:    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>,
+  dollar:   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  star:     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  micro:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>,
+  link:     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+  file:     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+  check:    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+  pin:      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+  mailSm:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
+  building: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M8 10h.01M16 10h.01M12 14h.01M8 14h.01M16 14h.01"/></svg>,
+  leaf:     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>,
+  robot:    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/><path d="M12 7v4"/><path d="M8 15h.01M16 15h.01"/></svg>,
+  extLink:  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  arrow:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+  linkedin: <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>,
+  instagram:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>,
+};
+
+function useScrollY() {
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    const fn = () => setY(window.scrollY);
+    window.addEventListener('scroll', fn, { passive: true });
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+  return y;
+}
+
+const scrollTo = (id) => { const el = document.querySelector(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); };
+
+/* ══════════════════════════════════ NAV ══════════════════════════════════ */
+function Nav() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const solid = useScrollY() > 80;
+
+  useEffect(() => { document.body.style.overflow = menuOpen ? 'hidden' : ''; return () => { document.body.style.overflow = ''; }; }, [menuOpen]);
+
+  const close = (id) => { setMenuOpen(false); setTimeout(() => scrollTo(id), 80); };
+  const links = [['#about','About'],['#services','Services'],['#clients','Clients'],['#seo-audit','Free Audit'],['#reviews','Reviews']];
+
+  return (
+    <>
+      <motion.nav className={`nav${solid?' solid':''}`} initial={{y:-16,opacity:0}} animate={{y:0,opacity:1}} transition={{duration:0.8,ease}}>
+        <a className="logo-mark" onClick={e=>{e.preventDefault();scrollTo('#hero')}} href="#hero">
+          <span className="logo-mark-top">Creative <em>Muse</em></span>
+          <span className="logo-mark-bottom">Marketing</span>
+        </a>
+        <ul className="nav-links">
+          {links.map(([id,label])=>(
+            <li key={id}><a onClick={e=>{e.preventDefault();scrollTo(id)}} href={id}>{label}</a></li>
+          ))}
+          <li><a onClick={e=>{e.preventDefault();scrollTo('#contact')}} href="#contact" className="nav-cta">Let's Talk</a></li>
+        </ul>
+        <button className="nav-hamburger" onClick={()=>setMenuOpen(!menuOpen)} aria-label="Menu">
+          <motion.span animate={menuOpen?{rotate:45,y:6}:{rotate:0,y:0}} transition={{duration:0.25}}/>
+          <motion.span animate={menuOpen?{opacity:0}:{opacity:1}} transition={{duration:0.2}}/>
+          <motion.span animate={menuOpen?{rotate:-45,y:-6}:{rotate:0,y:0}} transition={{duration:0.25}}/>
+        </button>
+      </motion.nav>
+      <AnimatePresence>
+        {menuOpen&&(
+          <motion.div className="mobile-overlay" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.35}}>
+            {links.map(([id,label],i)=>(
+              <motion.a key={id} href={id} onClick={()=>close(id)}
+                initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} exit={{opacity:0,y:10}}
+                transition={{delay:i*0.07,duration:0.5,ease}}
+              >{label}</motion.a>
+            ))}
+            <motion.a href="#contact" className="m-cta" onClick={()=>close('#contact')}
+              initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} exit={{opacity:0}}
+              transition={{delay:0.35,duration:0.5,ease}}
+            >Let's Talk →</motion.a>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+/* ══════════════════════════════════ HERO ══════════════════════════════════ */
+function FloatCard({ children, delay = 0, yOffset = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: yOffset }}
+      transition={{ duration: 1.1, delay, ease }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function Hero() {
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const op = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
+
+  return (
+    <section className="hero" id="hero" ref={heroRef}>
+      <div className="hero-noise" aria-hidden="true"/>
+      <div className="hero-grad" aria-hidden="true"/>
+
+      {/* LEFT */}
+      <motion.div className="hero-left" style={{ y, opacity: op }}>
+        <motion.div className="hero-eyebrow" initial={{opacity:0,x:-24}} animate={{opacity:1,x:0}} transition={{duration:0.8,delay:0.2,ease}}>
+          Canadian Roots · Dubai Operated
+        </motion.div>
+        <motion.h1 initial={{opacity:0,y:48}} animate={{opacity:1,y:0}} transition={{duration:1,delay:0.35,ease}}>
+          We Grow Brands<br/><em>That Mean</em><br/><strong>Something.</strong>
+        </motion.h1>
+        <motion.p className="hero-sub" initial={{opacity:0,y:28}} animate={{opacity:1,y:0}} transition={{duration:0.8,delay:0.55,ease}}>
+          AI-native execution. Boutique partnership. Built for founders and brands who refuse to be average — from Toronto to Dubai to the Caribbean.
+        </motion.p>
+        <motion.div className="hero-actions" initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.7,delay:0.72,ease}}>
+          <motion.a href="#contact" className="btn-gold" onClick={e=>{e.preventDefault();scrollTo('#contact')}}
+            whileHover={{scale:1.03,y:-2,boxShadow:'0 14px 40px rgba(201,168,76,0.28)'}}
+            whileTap={{scale:0.97}} transition={{type:'spring',stiffness:400,damping:20}}
+          >Let's Talk Growth {I.arrow}</motion.a>
+          <motion.a href="#services" className="btn-ghost" onClick={e=>{e.preventDefault();scrollTo('#services')}}
+            whileTap={{scale:0.97}}
+          >Our Services</motion.a>
+        </motion.div>
+        <motion.div className="hero-stats" initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.9,delay:0.95}}>
+          {[['10+','Years in Business'],['3','Markets Served'],['AI','Native Approach']].map(([n,l],i)=>(
+            <React.Fragment key={l}>
+              {i>0&&<div className="hero-stat-div" aria-hidden="true"/>}
+              <div><div className="hero-stat-num">{n}</div><div className="hero-stat-label">{l}</div></div>
+            </React.Fragment>
+          ))}
+        </motion.div>
+      </motion.div>
+
+      {/* RIGHT — floating result cards */}
+      <div className="hero-right">
+        <div className="hero-cards">
+          <FloatCard delay={0.9}>
+            <div className="result-card" style={{marginBottom:'12px'}}>
+              <div className="result-card-dot"/>
+              <div className="result-card-label">Average Traffic Growth</div>
+              <div className="result-card-value"><span>2×</span> Organic</div>
+              <div className="result-card-sub">Within first 4 months of engagement</div>
+            </div>
+          </FloatCard>
+
+          <FloatCard delay={1.05}>
+            <div className="hero-card-line"/>
+          </FloatCard>
+
+          <FloatCard delay={1.1}>
+            <div className="result-card" style={{margin:'12px 0 12px 40px'}}>
+              <div className="result-card-dot"/>
+              <div className="result-card-label">Paid Media ROI</div>
+              <div className="result-card-value"><span>4.8×</span> ROAS</div>
+              <div className="result-card-sub">AI-assisted creative testing & optimisation</div>
+            </div>
+          </FloatCard>
+
+          <FloatCard delay={1.2}>
+            <div className="hero-card-line"/>
+          </FloatCard>
+
+          <FloatCard delay={1.3}>
+            <div className="result-card" style={{marginTop:'12px'}}>
+              <div className="result-card-dot"/>
+              <div className="result-card-label">SEO Audit Delivery</div>
+              <div className="result-card-value"><span>48h</span></div>
+              <div className="result-card-sub">Human review — not an automated PDF</div>
+            </div>
+          </FloatCard>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════ ABOUT ══════════════════════════════════ */
+function About() {
+  const cards = [
+    { flag:'🇦🇪', icon:I.building, title:'Musetech Solutions FZCO', body:'Our legal entity, registered in the Dubai Free Zone. This structure lets us serve UAE, MENA, and international clients with full compliance and local credibility.' },
+    { flag:'🇨🇦', icon:I.leaf,     title:'Canadian Heritage',        body:'A decade building North American brands from the ground up. Strategic rigour, straight-talking culture, and an obsession with measurable outcomes — built in from day one.' },
+    { flag:null,  icon:I.robot,    title:'AI-Native, Human-Led',     body:'AI runs through every workflow — strategy, content, SEO, automation. Not as a gimmick, but as infrastructure. Faster outputs, sharper insights, better ROI for every client.' },
+  ];
+  return (
+    <section className="about section-fade-cream" id="about">
+      <div className="about-inner">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true,amount:0.2}}>
+          <div className="eyebrow">Our Story</div>
+          <h2 className="sec-title">A decade of craft.<br/><em>A new chapter.</em></h2>
+          <div className="gold-rule"/>
+          <div className="about-narrative">
+            <p className="lead">"We started as a scrappy Canadian agency. We grew into something bigger."</p>
+            <p>Creative Muse was founded in Canada with a simple belief: small and mid-sized businesses deserve the same quality of marketing as the Fortune 500. Over a decade, we built brands, launched campaigns, and drove real growth for clients across North America.</p>
+            <p style={{marginTop:'20px'}}>In 2024, we evolved. Under the umbrella of <strong>Musetech Solutions FZCO</strong> — our Dubai Free Zone entity — we brought that same Canadian rigour to the UAE and MENA markets. We operate at the intersection of creative storytelling and AI-powered execution.</p>
+            <p style={{marginTop:'20px'}}>We're not a faceless agency. We're a small, senior team that treats every client like a partner — because that's the only way we know how to work.</p>
+          </div>
+        </motion.div>
+        <motion.div className="about-cards" variants={stagger(0.12,0.1)} initial="hidden" whileInView="show" viewport={{once:true,amount:0.15}}>
+          {cards.map(c=>(
+            <motion.div key={c.title} className="about-card" variants={cardV}
+              whileHover={{borderColor:'rgba(201,168,76,0.3)',y:-3}}
+              transition={{type:'spring',stiffness:300,damping:22}}
+            >
+              {c.flag&&<div className="about-card-flag">{c.flag}</div>}
+              <div className="about-card-icon">{c.icon}</div>
+              <div className="about-card-title">{c.title}</div>
+              <p className="about-card-body">{c.body}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════ SERVICES ══════════════════════════════════ */
+const SERVICES = [
+  { n:'01', icon:I.brain,  name:'AI Marketing Strategy',          tag:'Strategy · AI',            desc:'Full-funnel strategy built with AI at its core — from ICP definition and market research to channel mix and campaign architecture. We think deeper and move faster than any traditional agency.' },
+  { n:'02', icon:I.search, name:'Generative Engine Optimisation', tag:'GEO · AEO · SEO',          desc:'Search is no longer just Google. We optimise your content, authority, and structure to rank on ChatGPT, Perplexity, and Gemini — while building the topical foundation that compounds on traditional search too.' },
+  { n:'03', icon:I.globe,  name:'Web Design & Development',       tag:'Web · WordPress',          desc:'Conversion-optimised, mobile-first websites built on WordPress and WooCommerce. Every site we ship is fast, accessible, and designed to turn visitors into revenue.' },
+  { n:'04', icon:I.phone,  name:'Social Media Management',        tag:'Social · Content',         desc:'Instagram, LinkedIn, TikTok — platform-specific strategy, carousel creation, Reel scripting, and community management built around 2026 algorithms and the way audiences actually consume content.' },
+  { n:'05', icon:I.dollar, name:'Paid Media (PPC & Paid Social)', tag:'Google · Meta · LinkedIn', desc:'Google Ads, Meta, LinkedIn, and TikTok campaigns managed with AI-assisted creative testing and real-time optimisation. We chase cost-per-acquisition — never vanity metrics.' },
+  { n:'06', icon:I.star,   name:'Brand Identity & Creative',      tag:'Brand · Design',           desc:'Logo systems, visual identity, tone of voice, and brand guidelines built for businesses that want to stand out — and stay that way. We create brands that feel premium, because they are.' },
+];
+
+function Services() {
+  return (
+    <section className="services section-fade-dark" id="services">
+      <div className="services-inner">
+        <motion.div className="services-header" variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true,amount:0.2}}>
+          <div className="eyebrow">What We Do</div>
+          <h2 className="sec-title light">Services built for<br/><em>today's landscape.</em></h2>
+          <p className="sec-sub light" style={{marginTop:'14px'}}>The marketing playbook has changed. AI has rewritten who does what, how fast, and at what cost. Every service we offer is built around that reality.</p>
+        </motion.div>
+        <motion.div className="services-grid" variants={stagger(0.08,0.05)} initial="hidden" whileInView="show" viewport={{once:true,amount:0.05}}>
+          {SERVICES.map(s=>(
+            <motion.div key={s.name} className="srv-card" variants={cardV}
+              whileHover={{y:-5,borderColor:'rgba(201,168,76,0.18)',background:'rgba(201,168,76,0.03)',boxShadow:'0 28px 60px rgba(0,0,0,0.4)'}}
+              transition={{type:'spring',stiffness:260,damping:20}}
+            >
+              <div className="srv-num">{s.n}</div>
+              <div className="srv-icon">{s.icon}</div>
+              <h3>{s.name}</h3>
+              <p>{s.desc}</p>
+              <span className="srv-tag">{s.tag}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════ CASE STUDIES ══════════════════════════════════ */
+function CaseStudy({ dark, reverse, badge, title, tagline, desc, offerings, ctaLabel, ctaHref, imgSrc, imgAlt }) {
+  const theme = dark ? 'light' : 'dark-txt';
+  return (
+    <div className={`case-study ${dark ? 'dark section-fade-dark' : 'cream section-fade-cream'}`}>
+      <div className={`case-inner${reverse ? ' reverse' : ''}`}>
+        <motion.div className="case-img-wrap" variants={fadeIn} initial="hidden" whileInView="show" viewport={{once:true,amount:0.2}}>
+          <div className="case-img-bracket tl"/>
+          <img src={imgSrc} alt={imgAlt} className="case-img"/>
+          <div className="case-img-bracket br"/>
+        </motion.div>
+        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true,amount:0.2}}>
+          <div className="case-badge">
+            <div className="case-badge-dot"/>
+            <span className="case-badge-text">{badge}</span>
+          </div>
+          <div className={`case-title ${theme}`}>{title}</div>
+          <div className="case-tagline">{tagline}</div>
+          <p className={`case-desc ${theme}`}>{desc}</p>
+          <div className={`case-offerings-label ${theme}`}>What we delivered</div>
+          <ul className="case-offerings">
+            {offerings.map(o=><li key={o} className={theme}>{o}</li>)}
+          </ul>
+          <motion.a href={ctaHref} target="_blank" rel="noopener noreferrer"
+            className={dark ? 'btn-outline-light' : 'btn-outline-dark'}
+            whileHover={dark ? {background:'var(--gold)',color:'var(--dark)',borderColor:'var(--gold)'} : {background:'var(--ink)',color:'var(--white)'}}
+            whileTap={{scale:0.97}}
+          >{ctaLabel} {I.extLink}</motion.a>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+function Clients() {
+  return (
+    <div id="clients">
+      <CaseStudy
+        dark={true} reverse={false}
+        badge="UAE · Canada · Caribbean"
+        title="Tappit Cards"
+        tagline="The smarter way to network."
+        desc="Tappit came to us as a product with potential and a brand that wasn't telling its story. We rebuilt their digital presence from the ground up — sharpening the positioning, launching paid campaigns across three markets, and building the SEO foundation that now drives consistent inbound leads."
+        offerings={['Full brand identity & website rebuild','Multi-market paid media (Meta + Google)','SEO strategy & content architecture','Email nurture sequences for B2B leads']}
+        ctaLabel="Visit Tappit Cards"
+        ctaHref="https://tappitcards.com"
+        imgSrc="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80"
+        imgAlt="Tappit Cards — NFC Digital Business Cards"
+      />
+      <CaseStudy
+        dark={false} reverse={true}
+        badge="UAE · Global"
+        title="Auralis Crystals"
+        tagline="Wellness through natural energy."
+        desc="Auralis needed more than a pretty store — they needed a brand that resonated with a spiritually-minded, design-conscious audience across the UAE and beyond. We built the visual identity, launched their WooCommerce store, and created the content ecosystem that turned browsers into loyal customers."
+        offerings={['E-commerce strategy & WooCommerce build','Visual identity & product photography direction','Instagram & TikTok content strategy','AI-powered product description & SEO content']}
+        ctaLabel="Visit Auralis Crystals"
+        ctaHref="https://auraliscrystals.com"
+        imgSrc="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=800&q=80"
+        imgAlt="Auralis Crystals — Wellness & Crystal E-Commerce"
+      />
+      <div className="case-nda">
+        <motion.p variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}>
+          Many of our partnerships are covered by NDAs. The work speaks for itself.
+        </motion.p>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════ SEO AUDIT ══════════════════════════════════ */
+function SeoAudit() {
+  const [form, setForm] = useState({name:'',email:'',url:'',company:''});
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = true;
+    if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) e.email = true;
+    if (!form.url.trim()) e.url = true;
+    return e;
+  };
+  const handleSubmit = ev => {
+    ev.preventDefault();
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    setLoading(true);
+    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1200);
+  };
+
+  const feats = [
+    {icon:I.micro, title:'Technical SEO & Core Web Vitals', desc:'Crawlability, indexation, page speed, and site structure.'},
+    {icon:I.brain, title:'AI Search Visibility (GEO/AEO)',  desc:'Are you being cited by ChatGPT, Perplexity, or Gemini?'},
+    {icon:I.file,  title:'Content & Keyword Gaps',          desc:"What competitors rank for that you don't — and why."},
+    {icon:I.link,  title:'Backlink & Authority Profile',     desc:'Your link profile vs. top 3 organic competitors.'},
+  ];
+
+  return (
+    <section className="seo-audit section-fade-dark" id="seo-audit">
+      <div className="seo-inner">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true,amount:0.15}}>
+          <div className="eyebrow">Free Audit</div>
+          <h2 className="sec-title light">Get your free<br/><em>AI-powered</em><br/>SEO audit.</h2>
+          <p className="sec-sub light" style={{marginTop:'18px'}}>Not an automated PDF with 200 orange warning icons. A real, human review of your site — technical health, keyword gaps, AI search visibility, and competitor comparison.</p>
+          <motion.div className="seo-features" variants={stagger(0.1,0.2)} initial="hidden" whileInView="show" viewport={{once:true,amount:0.1}}>
+            {feats.map(f=>(
+              <motion.div key={f.title} className="seo-feat" variants={cardV}>
+                <div className="seo-feat-icon">{f.icon}</div>
+                <div><div className="seo-feat-title">{f.title}</div><div className="seo-feat-desc">{f.desc}</div></div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+        <motion.div variants={{hidden:{opacity:0,y:32},show:{opacity:1,y:0,transition:{duration:0.85,delay:0.15,ease}}}} initial="hidden" whileInView="show" viewport={{once:true,amount:0.15}}>
+          <div className="seo-form-box">
+            <h3>Request Your Free Audit</h3>
+            <p className="form-sub">No commitment. Delivered within 48 hours by a real human.</p>
+            <AnimatePresence mode="wait">
+              {submitted ? (
+                <motion.div className="form-success" key="ok" initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{duration:0.45}}>
+                  <motion.div style={{color:'var(--gold)'}} initial={{scale:0}} animate={{scale:1}} transition={{delay:0.25,type:'spring',stiffness:180}}>{I.check}</motion.div>
+                  <div style={{marginTop:'14px',color:'var(--white)'}}>We've received your request.<br/>Expect your audit within 48 hours.</div>
+                </motion.div>
+              ) : (
+                <motion.form key="form" onSubmit={handleSubmit} noValidate exit={{opacity:0}}>
+                  {[{id:'name',label:'Your Name',type:'text',ph:'Jane Smith'},{id:'email',label:'Work Email',type:'email',ph:'jane@company.com'},{id:'url',label:'Website URL',type:'url',ph:'https://yourwebsite.com'},{id:'company',label:'Company',type:'text',ph:'Your brand or company name'}].map(f=>(
+                    <div key={f.id} className="field">
+                      <label htmlFor={`a-${f.id}`}>{f.label}</label>
+                      <input id={`a-${f.id}`} type={f.type} placeholder={f.ph} value={form[f.id]} onChange={e=>{setForm({...form,[f.id]:e.target.value});setErrors({...errors,[f.id]:false})}} className={errors[f.id]?'error':''}/>
+                    </div>
+                  ))}
+                  <motion.button type="submit" className="btn-gold" disabled={loading}
+                    style={{width:'100%',justifyContent:'center',borderRadius:'var(--r)',marginTop:'6px',opacity:loading?.7:1}}
+                    whileHover={!loading?{scale:1.01,boxShadow:'0 10px 28px rgba(201,168,76,0.22)'}:{}}
+                    whileTap={!loading?{scale:0.98}:{}}
+                  >{loading?'Sending…':'Send Me the Free Audit →'}</motion.button>
+                  <p className="form-note">No spam. No automated reports. We respond within 48 hours.</p>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════ NEWSLETTER ══════════════════════════════════ */
+function Newsletter() {
+  const [email, setEmail] = useState('');
+  const [done, setDone] = useState(false);
+  return (
+    <section className="newsletter section-fade-cream" id="newsletter">
+      <motion.div className="newsletter-inner" variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true,amount:0.25}}>
+        <div className="eyebrow" style={{justifyContent:'center'}}>Weekly Insights</div>
+        <h2 className="sec-title" style={{color:'var(--ink)'}}>Stay Ahead of the<br/><em>AI Marketing Curve.</em></h2>
+        <p className="sec-sub" style={{margin:'0 auto',marginTop:'14px'}}>One email per week. What's actually working in AI-driven marketing — tools, frameworks, and case studies. No fluff. Read by founders across UAE, Canada, and the Caribbean.</p>
+        <AnimatePresence mode="wait">
+          {done ? (
+            <motion.p key="done" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} style={{marginTop:'44px',fontSize:'16px',color:'var(--navy)',fontWeight:500}}>
+              You're in — look for your first edition next Tuesday.
+            </motion.p>
+          ) : (
+            <motion.form key="f" className="nl-form" exit={{opacity:0}} onSubmit={e=>{e.preventDefault();if(email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))setDone(true)}}>
+              <input type="email" placeholder="Enter your email address" value={email} onChange={e=>setEmail(e.target.value)} required aria-label="Email address"/>
+              <motion.button type="submit" whileHover={{background:'var(--ink)'}} whileTap={{scale:0.97}}>Subscribe Free →</motion.button>
+            </motion.form>
+          )}
+        </AnimatePresence>
+        <p className="nl-note">No spam. Sent every Tuesday. Unsubscribe any time.</p>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════ REVIEWS ══════════════════════════════════ */
+const REVIEWS = [
+  {text:"Creative Muse completely transformed how we show up online. Our organic traffic doubled within four months, and the quality of leads improved dramatically. Best marketing investment we've made as a firm.",name:"Michael K.",company:"Founder, Real Estate Brokerage",geo:"Ontario, Canada",initials:"MK",color:"#1A2244"},
+  {text:"They didn't just build us a website — they built us a revenue engine. The SEO work alone paid for the entire engagement within the first year. Pankit's team genuinely understands the Dubai market.",name:"Sarah A.",company:"Director, Professional Services",geo:"Dubai, UAE",initials:"SA",color:"#C9A84C"},
+  {text:"The AI-powered content strategy they built for us outperformed everything we'd tried previously. They think like a growth partner, not an agency. We've renewed every year since.",name:"James T.",company:"CEO, E-Commerce Brand",geo:"Cayman Islands",initials:"JT",color:"#2D3350"},
+];
+
+function Reviews() {
+  return (
+    <section className="reviews section-fade-dark" id="reviews">
+      <div className="reviews-inner">
+        <motion.div className="reviews-header" variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true,amount:0.2}}>
+          <div>
+            <div className="eyebrow">Client Reviews</div>
+            <h2 className="sec-title light">What our clients say.</h2>
+          </div>
+          <div className="clutch-badge"><span className="clutch-stars">★★★★★</span><span>Verified on Clutch.co</span></div>
+        </motion.div>
+        <motion.div className="reviews-grid" variants={stagger(0.13)} initial="hidden" whileInView="show" viewport={{once:true,amount:0.1}}>
+          {REVIEWS.map(r=>(
+            <motion.div key={r.name} className="rev-card" variants={cardV}
+              whileHover={{borderColor:'rgba(201,168,76,0.22)',y:-4}}
+              transition={{type:'spring',stiffness:280,damping:22}}
+            >
+              <div className="rev-stars">★★★★★</div>
+              <p className="rev-text">"{r.text}"</p>
+              <div className="rev-author">
+                <div className="rev-avatar" style={{background:r.color}} aria-hidden="true">{r.initials}</div>
+                <div><div className="rev-name">{r.name}</div><div className="rev-co">{r.company} · {r.geo}</div></div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+        <motion.div className="reviews-cta" variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}>
+          <motion.a href="https://clutch.co" target="_blank" rel="noopener noreferrer" className="btn-outline-gold"
+            whileHover={{background:'var(--gold)',color:'var(--dark)',borderColor:'var(--gold)'}} whileTap={{scale:0.97}}
+          >View All Reviews on Clutch.co {I.extLink}</motion.a>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════ CONTACT ══════════════════════════════════ */
+function Contact() {
+  const [form, setForm] = useState({name:'',email:'',company:'',message:'',service:''});
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = true;
+    if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) e.email = true;
+    if (!form.message.trim()) e.message = true;
+    return e;
+  };
+  const handleSubmit = ev => {
+    ev.preventDefault();
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    setLoading(true);
+    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1200);
+  };
+
+  return (
+    <section className="contact section-fade-navy" id="contact">
+      <div className="contact-inner">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true,amount:0.15}}>
+          <div className="eyebrow">Get In Touch</div>
+          <h2 className="sec-title light">Ready to grow<br/><em>something great?</em></h2>
+          <div className="gold-rule"/>
+          <p style={{fontSize:'16px',lineHeight:1.8,color:'rgba(255,255,255,0.5)',fontWeight:300,marginBottom:'44px'}}>
+            Whether you're launching a brand, scaling in the UAE, or looking to bring AI into your marketing — we'd love to hear what you're building.
+          </p>
+          {[{icon:I.mailSm,label:'Email',val:<a href="mailto:hello@creativemuse.com">hello@creativemuse.com</a>},{icon:I.pin,label:'Offices',val:'Dubai, UAE 🇦🇪  ·  Canada 🇨🇦'},{icon:I.building,label:'Legal Entity',val:'Musetech Solutions FZCO'}].map(d=>(
+            <div key={d.label} className="contact-detail">
+              <div className="contact-detail-icon">{d.icon}</div>
+              <div><div className="contact-detail-label">{d.label}</div><div className="contact-detail-val">{d.val}</div></div>
+            </div>
+          ))}
+        </motion.div>
+        <motion.div variants={{hidden:{opacity:0,y:32},show:{opacity:1,y:0,transition:{duration:0.85,delay:0.15,ease}}}} initial="hidden" whileInView="show" viewport={{once:true,amount:0.15}}>
+          <div className="contact-form-box">
+            <h3>Send us a message</h3>
+            <AnimatePresence mode="wait">
+              {submitted ? (
+                <motion.div className="form-success" key="ok" initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{duration:0.45}}>
+                  <motion.div style={{color:'var(--gold)'}} initial={{scale:0}} animate={{scale:1}} transition={{delay:0.25,type:'spring',stiffness:180}}>{I.check}</motion.div>
+                  <div style={{marginTop:'14px',color:'var(--white)'}}>Thanks — we'll be in touch within 24 hours.</div>
+                </motion.div>
+              ) : (
+                <motion.form key="f" onSubmit={handleSubmit} noValidate exit={{opacity:0}}>
+                  <div className="field-row">
+                    <div className="field"><label htmlFor="c-name">Name</label><input id="c-name" type="text" placeholder="Jane Smith" value={form.name} onChange={e=>{setForm({...form,name:e.target.value});setErrors({...errors,name:false})}} className={errors.name?'error':''}/></div>
+                    <div className="field"><label htmlFor="c-email">Email</label><input id="c-email" type="email" placeholder="jane@company.com" value={form.email} onChange={e=>{setForm({...form,email:e.target.value});setErrors({...errors,email:false})}} className={errors.email?'error':''}/></div>
+                  </div>
+                  <div className="field-row">
+                    <div className="field"><label htmlFor="c-co">Company</label><input id="c-co" type="text" placeholder="Brand or company" value={form.company} onChange={e=>setForm({...form,company:e.target.value})}/></div>
+                    <div className="field">
+                      <label htmlFor="c-srv">Service Interest</label>
+                      <select id="c-srv" value={form.service} onChange={e=>setForm({...form,service:e.target.value})} style={{background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.08)',borderRadius:'var(--r)',padding:'14px 18px',width:'100%',color:form.service?'var(--white)':'rgba(255,255,255,.25)',fontFamily:"'DM Sans',sans-serif",fontSize:'14px',outline:'none',cursor:'pointer',appearance:'none'}}>
+                        <option value="" style={{background:'#1A2244'}}>Select a service</option>
+                        {['AI Marketing Strategy','SEO & GEO','Web Development','Paid Media','Social Media','Brand Identity','Other / Not sure'].map(s=><option key={s} value={s} style={{background:'#1A2244'}}>{s}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="field"><label htmlFor="c-msg">Message</label><textarea id="c-msg" placeholder="Tell us about your project, goals, or questions…" value={form.message} onChange={e=>{setForm({...form,message:e.target.value});setErrors({...errors,message:false})}} className={errors.message?'error':''} rows="4"/></div>
+                  <motion.button type="submit" className="btn-gold" disabled={loading}
+                    style={{width:'100%',justifyContent:'center',borderRadius:'var(--r)',marginTop:'6px',opacity:loading?.7:1}}
+                    whileHover={!loading?{scale:1.01,boxShadow:'0 10px 28px rgba(201,168,76,0.22)'}:{}}
+                    whileTap={!loading?{scale:0.98}:{}}
+                  >{loading?'Sending…':'Send Message →'}</motion.button>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════ FOOTER ══════════════════════════════════ */
+function Footer() {
+  return (
+    <footer>
+      <div className="footer-inner">
+        <div className="footer-top">
+          <div>
+            <div style={{marginBottom:'14px'}}>
+              <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:'26px',fontWeight:600,color:'var(--white)',letterSpacing:'-0.5px',lineHeight:1}}>
+                Creative <em style={{fontStyle:'italic',color:'var(--gold)',fontWeight:300}}>Muse</em>
+              </div>
+              <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:'9px',fontWeight:400,color:'rgba(255,255,255,0.3)',letterSpacing:'3.5px',textTransform:'uppercase',marginTop:'4px'}}>Marketing</div>
+            </div>
+            <div className="footer-tagline">Canadian Roots · Dubai Operated</div>
+            <p className="footer-desc">AI-powered digital marketing for brands that mean business. Boutique in feel, enterprise in capability.</p>
+            <span className="footer-entity">Musetech Solutions FZCO</span>
+          </div>
+          <div className="footer-col">
+            <h4>Services</h4>
+            <ul>{['AI Marketing Strategy','SEO & GEO','Paid Media','Web Development','Social Media','Brand Identity'].map(s=><li key={s}><a onClick={()=>scrollTo('#services')}>{s}</a></li>)}</ul>
+          </div>
+          <div className="footer-col">
+            <h4>Company</h4>
+            <ul>{[['#about','About'],['#clients','Clients'],['#reviews','Reviews'],['#newsletter','Newsletter'],['#seo-audit','Free SEO Audit']].map(([id,l])=><li key={id}><a onClick={()=>scrollTo(id)}>{l}</a></li>)}</ul>
+          </div>
+          <div className="footer-col">
+            <h4>Contact</h4>
+            <ul>
+              <li><a href="mailto:hello@creativemuse.com">hello@creativemuse.com</a></li>
+              <li><a onClick={()=>scrollTo('#contact')}>Dubai, UAE 🇦🇪</a></li>
+              <li><a onClick={()=>scrollTo('#contact')}>Canada 🇨🇦</a></li>
+              <li><a href="https://tappitcards.com" target="_blank" rel="noopener noreferrer">Tappit Cards {I.extLink}</a></li>
+              <li><a href="https://auraliscrystals.com" target="_blank" rel="noopener noreferrer">Auralis Crystals {I.extLink}</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <div className="footer-copy">© 2026 Musetech Solutions FZCO. All rights reserved. creativemuse.com</div>
+          <div className="footer-socials">
+            <motion.a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="footer-social-link" aria-label="LinkedIn" whileHover={{borderColor:'var(--gold)',color:'var(--gold)'}}>{I.linkedin}</motion.a>
+            <motion.a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer-social-link" aria-label="Instagram" whileHover={{borderColor:'var(--gold)',color:'var(--gold)'}}>{I.instagram}</motion.a>
+          </div>
+          <div className="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms &amp; Conditions</a></div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function App() {
+  return (<><Nav/><Hero/><About/><Services/><Clients/><SeoAudit/><Newsletter/><Reviews/><Contact/><Footer/></>);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
