@@ -260,43 +260,62 @@ document.addEventListener('DOMContentLoaded', async function() {
     ].join('');
     document.head.appendChild(sectionStyle);
 
-    // Shared observer: threshold 0.3 / rootMargin -30% as specified, with a
-    // tall-section fallback — if a section is taller than the trigger band can
-    // ever fill to 30%, reveal it once its top passes mid-viewport so no
-    // section can ever stay permanently hidden.
-    var sectionIO = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (!entry.isIntersecting) return;
-        var vh = window.innerHeight || document.documentElement.clientHeight;
-        var tallFallback = entry.boundingClientRect.top <= vh * 0.5;
-        if (entry.intersectionRatio >= 0.3 || tallFallback) {
-          entry.target.classList.add('is-visible');
-          sectionIO.unobserve(entry.target);
-        }
-      });
-    }, { threshold: [0, 0.3], rootMargin: '0px 0px -30% 0px' });
+    // Observer factory. On reveal, also clear the lingering compositing layer:
+    // the generic [data-reveal] rule sets will-change:transform plus a residual
+    // transform (translateY(0)/scale(1)) that stays on the container forever,
+    // which can freeze a child's whileHover repaint (the stuck srv-card hover).
+    // A transitionend listener resets transform:none + will-change:auto once the
+    // reveal finishes, dissolving the layer so Framer hover fires normally.
+    function makeRevealObserver(primary, rootMargin) {
+      return new IntersectionObserver(function(entries, observer) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var vh = window.innerHeight || document.documentElement.clientHeight;
+          var fallback = entry.boundingClientRect.top <= vh * 0.5;
+          if (entry.intersectionRatio >= primary || fallback) {
+            var el = entry.target;
+            el.classList.add('is-visible');
+            var onEnd = function(e) {
+              if (e.target !== el || e.propertyName !== 'transform') return;
+              el.style.transform = 'none';
+              el.style.willChange = 'auto';
+              el.removeEventListener('transitionend', onEnd);
+            };
+            el.addEventListener('transitionend', onEnd);
+            observer.unobserve(el);
+          }
+        });
+      }, { threshold: [0, primary], rootMargin: rootMargin });
+    }
 
-    // Same MutationObserver pattern as hero/about: wait for React to mount the
-    // section, tag the container, hand it to the shared observer.
-    function wireReveal(id, name) {
+    // Late trigger (threshold 0.05 / rootMargin -50%): section must be halfway
+    // up the screen before it plays, so the user actually sees the animation.
+    var lateIO = makeRevealObserver(0.05, '0px 0px -50% 0px');
+    // Standard trigger (threshold 0.3 / rootMargin -30%) for the sections that
+    // already feel right; keeps the tall-section fallback.
+    var standardIO = makeRevealObserver(0.3, '0px 0px -30% 0px');
+
+    // Same MutationObserver pattern as hero: wait for React to mount the
+    // section, tag the container, hand it to the chosen observer.
+    function wireReveal(id, name, io) {
       var w = new MutationObserver(function() {
         var el = document.getElementById(id);
         if (el) {
           el.setAttribute('data-reveal', name);
-          sectionIO.observe(el);
+          io.observe(el);
           w.disconnect();
         }
       });
       w.observe(document.body, { childList: true, subtree: true });
     }
 
-    wireReveal('about', 'about');
-    wireReveal('services', 'services');
-    wireReveal('trusted-by', 'logos');
-    wireReveal('clients', 'ventures');
-    wireReveal('seo-audit', 'seoaudit');
-    wireReveal('reviews', 'reviews');
-    wireReveal('contact', 'contact');
+    wireReveal('about', 'about', lateIO);
+    wireReveal('services', 'services', lateIO);
+    wireReveal('trusted-by', 'logos', standardIO);
+    wireReveal('clients', 'ventures', standardIO);
+    wireReveal('seo-audit', 'seoaudit', lateIO);
+    wireReveal('reviews', 'reviews', standardIO);
+    wireReveal('contact', 'contact', lateIO);
     // ────────────────────────────────────────────────────────────────────────
 
   } catch (err) {
