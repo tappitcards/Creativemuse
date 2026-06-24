@@ -228,6 +228,23 @@ document.addEventListener('DOMContentLoaded', async function() {
       cmWatcher.disconnect();
     });
     cmWatcher.observe(document.body, { childList: true, subtree: true });
+
+    // ── About scroll reveal: fade-up ────────────────────────────────────────
+    var aboutStyle = document.createElement('style');
+    aboutStyle.textContent =
+      '[data-reveal="about"]{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}' +
+      '[data-reveal="about"].is-visible{opacity:1;transform:translateY(0)}';
+    document.head.appendChild(aboutStyle);
+
+    var aboutWatcher = new MutationObserver(function() {
+      var about = document.getElementById('about');
+      if (about) {
+        about.setAttribute('data-reveal', 'about');
+        revealIO.observe(about);
+        aboutWatcher.disconnect();
+      }
+    });
+    aboutWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
   } catch (err) {
