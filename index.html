@@ -233,7 +233,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     var aboutStyle = document.createElement('style');
     aboutStyle.textContent =
       '[data-reveal="about"]{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}' +
-      '[data-reveal="about"].is-visible{opacity:1;transform:translateY(0)}';
+      '[data-reveal="about"].is-visible{opacity:1;transform:translateY(0)}' +
+      /* suppress Framer RevealLines left-to-right clip on the about headline */
+      '#about .sec-title [style*="clip-path"]{clip-path:none!important;transform:none!important;opacity:1!important}';
     document.head.appendChild(aboutStyle);
 
     var aboutIO = new IntersectionObserver(function(entries) {
@@ -243,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           aboutIO.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.3, rootMargin: '0px 0px -30% 0px' });
+    }, { threshold: 0.45, rootMargin: '0px 0px -40% 0px' });
 
     var aboutWatcher = new MutationObserver(function() {
       var about = document.getElementById('about');
