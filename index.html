@@ -159,6 +159,42 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
       window.Babel.transformScriptTags();
     }
+
+    // ── Hero scroll reveal ──────────────────────────────────────────────────
+    // Inject CSS into the new document's head.
+    var heroStyle = document.createElement('style');
+    heroStyle.textContent = [
+      '[data-reveal]{opacity:0;will-change:transform,opacity}',
+      '[data-reveal].is-visible{opacity:1}',
+      '[data-reveal="hero"] h1{opacity:0;transform:translateY(40px);filter:blur(10px);transition:all 1.2s cubic-bezier(0.16,1,0.3,1)}',
+      '[data-reveal="hero"].is-visible h1{opacity:1;transform:translateY(0);filter:blur(0)}',
+      '[data-reveal="hero"] p,[data-reveal="hero"] .cta{opacity:0;transform:translateY(20px);transition:all 1s ease;transition-delay:0.3s}',
+      '[data-reveal="hero"].is-visible p,[data-reveal="hero"].is-visible .cta{opacity:1;transform:translateY(0)}',
+    ].join('');
+    document.head.appendChild(heroStyle);
+
+    // IntersectionObserver — fires once hero is in view.
+    var revealIO = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+    // MutationObserver — waits for React to mount #hero, then wires it up.
+    var domWatcher = new MutationObserver(function() {
+      var hero = document.getElementById('hero');
+      if (hero) {
+        hero.setAttribute('data-reveal', 'hero');
+        revealIO.observe(hero);
+        domWatcher.disconnect();
+      }
+    });
+    domWatcher.observe(document.body, { childList: true, subtree: true });
+    // ───────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
