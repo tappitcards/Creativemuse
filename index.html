@@ -318,6 +318,38 @@ document.addEventListener('DOMContentLoaded', async function() {
     wireReveal('contact', 'contact', lateIO);
     // ────────────────────────────────────────────────────────────────────────
 
+    // ── Gold pulse glow: "chose us" (logos) + "AI-powered" (SEO audit) ───────
+    var glowStyle = document.createElement('style');
+    glowStyle.textContent =
+      '.glow-gold{color:#C9A84C;animation:goldPulse 2.5s ease-in-out infinite}' +
+      '@keyframes goldPulse{0%,100%{text-shadow:0 0 8px rgba(201,168,76,0.3),0 0 20px rgba(201,168,76,0.1)}50%{text-shadow:0 0 16px rgba(201,168,76,0.7),0 0 40px rgba(201,168,76,0.3)}}';
+    document.head.appendChild(glowStyle);
+
+    var glowWatcher = new MutationObserver(function() {
+      var titleDone = false, emDone = false;
+      // Logos title "Brands that chose us to grow." — plain h2, safe to wrap
+      var clTitle = document.querySelector('.cl-title');
+      if (clTitle) {
+        if (clTitle.querySelector('.glow-gold')) {
+          titleDone = true;
+        } else if (/chose us/i.test(clTitle.textContent)) {
+          clTitle.innerHTML = clTitle.innerHTML.replace(/chose us/i, '<span class="glow-gold">chose us</span>');
+          titleDone = true;
+        }
+      }
+      // SEO audit "AI-powered" — already its own <em>, just add the class
+      var seo = document.getElementById('seo-audit');
+      if (seo) {
+        var ems = seo.querySelectorAll('em');
+        for (var i = 0; i < ems.length; i++) {
+          if (/ai-powered/i.test(ems[i].textContent)) { ems[i].classList.add('glow-gold'); emDone = true; break; }
+        }
+      }
+      if (titleDone && emDone) glowWatcher.disconnect();
+    });
+    glowWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
