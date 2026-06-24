@@ -194,6 +194,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
     domWatcher.observe(document.body, { childList: true, subtree: true });
 
+    // ── About scroll reveal ─────────────────────────────────────────────────
+    var aboutStyle = document.createElement('style');
+    aboutStyle.textContent = [
+      '[data-reveal="about"]{clip-path:inset(0 100% 0 0);transition:clip-path 1s cubic-bezier(0.16,1,0.3,1)}',
+      '[data-reveal="about"].is-visible{clip-path:inset(0 0% 0 0)}',
+      '[data-reveal="about"] *{opacity:0;transform:translateY(20px);transition:all 0.8s ease;transition-delay:0.4s}',
+      '[data-reveal="about"].is-visible *{opacity:1;transform:translateY(0)}',
+    ].join('');
+    document.head.appendChild(aboutStyle);
+
+    var aboutWatcher = new MutationObserver(function() {
+      var about = document.getElementById('about');
+      if (about) {
+        about.setAttribute('data-reveal', 'about');
+        revealIO.observe(about);
+        aboutWatcher.disconnect();
+      }
+    });
+    aboutWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
     // ── Client Markets card: lock to static GPU-composited position ─────────
     // Root cause: fx-revealed applies transform:none!important (via [data-rv])
     // 1.8 s after load, clearing Framer's translateX(40px) on the outer FloatCard
