@@ -425,9 +425,27 @@ document.addEventListener('DOMContentLoaded', async function() {
       '.v-text-left{transform:translateX(-80px)}',
       '#clients[style*="opacity: 1"] .venture-slide{transform:translateX(0)}',
       '.case-study.cream .venture-slide{transition-delay:0.3s}',
-      // Auralis (cream/light bg) only — darker tones so number + line stay visible
-      '.case-study.cream .venture-num{color:rgba(100,80,40,0.06)}',
-      '.case-study.cream .venture-line{background:linear-gradient(90deg,#8B6D38,transparent)}',
+      // ── Auralis (cream) brand palette — scoped to .case-study.cream only ──
+      // Contain the Auralis wrapper's horizontal slide without a scrollbar.
+      '#clients{overflow-x:clip}',
+      // Headings -> dark charcoal
+      '.case-study.cream .case-title,.case-study.cream .case-title *{color:#1A1A1A}',
+      // Subtitle -> Auralis brand green
+      '.case-study.cream .case-badge-text{color:#295D2C}',
+      // Body -> uniform dark (also strips any stray colored highlights)
+      '.case-study.cream .case-desc,.case-study.cream .case-desc *{color:#2C2C2C}',
+      // Tags -> green border + text, green hover wash
+      '.case-study.cream .case-tag{border-color:#295D2C;color:#295D2C}',
+      '#clients .case-study.cream .case-tag:hover{border-color:#295D2C;color:#295D2C;background:rgba(41,93,44,0.08)}',
+      // Visit button -> green outline pill, fills green on hover
+      '#clients .case-study.cream .btn-venture{border-color:#295D2C;color:#295D2C}',
+      '#clients .case-study.cream .btn-venture:hover{background:#295D2C;color:#FAF7F2;border-color:#295D2C}',
+      // "02" number -> subtle green tint
+      '.case-study.cream .venture-num{color:rgba(41,93,44,0.06)}',
+      // Top line -> green gradient
+      '.case-study.cream .venture-line{background:linear-gradient(90deg,#295D2C,transparent)}',
+      // Independent reveal: Auralis wrapper slides in from the right + fades
+      '.case-study.cream{opacity:0;transform:translateX(80px);transition:opacity 1.2s cubic-bezier(0.16,1,0.3,1),transform 1.2s cubic-bezier(0.16,1,0.3,1)}',
     ].join('');
     document.head.appendChild(ventStyle);
 
@@ -480,6 +498,24 @@ document.addEventListener('DOMContentLoaded', async function() {
           textCol.parentNode.insertBefore(w2, textCol);
           w2.appendChild(textCol);
         }
+      }
+
+      // Independent scroll reveal for the Auralis (cream) case study — slides in
+      // from the right + fades when it enters the viewport (same scroll-listener
+      // pattern as the section reveals). Tappit is untouched.
+      var auralis = section.querySelector('.case-study.cream');
+      if (auralis) {
+        var revealAuralis = function() {
+          if (auralis.getAttribute('data-revealed')) return;
+          if (auralis.getBoundingClientRect().top < window.innerHeight * 0.6) {
+            auralis.style.opacity = '1';
+            auralis.style.transform = 'translateX(0)';
+            auralis.setAttribute('data-revealed', '1');
+            window.removeEventListener('scroll', revealAuralis);
+          }
+        };
+        window.addEventListener('scroll', revealAuralis, { passive: true });
+        revealAuralis();
       }
 
       section.setAttribute('data-vent-enhanced', '1');
