@@ -260,39 +260,39 @@ document.addEventListener('DOMContentLoaded', async function() {
     ].join('');
     document.head.appendChild(sectionStyle);
 
-    // Observer factory. On reveal, also clear the lingering compositing layer:
-    // the generic [data-reveal] rule sets will-change:transform plus a residual
-    // transform (translateY(0)/scale(1)) that stays on the container forever,
-    // which can freeze a child's whileHover repaint (the stuck srv-card hover).
-    // A transitionend listener resets transform:none + will-change:auto once the
-    // reveal finishes, dissolving the layer so Framer hover fires normally.
+    // Reveal one section: add .is-visible (once) and, on completion, clear the
+    // lingering compositing layer — the generic [data-reveal] rule leaves
+    // will-change:transform plus a residual transform on the container, which
+    // can freeze a child's whileHover repaint (the stuck srv-card hover). A
+    // transitionend reset of transform:none + will-change:auto dissolves it.
+    function revealEl(el) {
+      if (el.classList.contains('is-visible')) return;
+      el.classList.add('is-visible');
+      var onEnd = function(e) {
+        if (e.target !== el || e.propertyName !== 'transform') return;
+        el.style.transform = 'none';
+        el.style.willChange = 'auto';
+        el.removeEventListener('transitionend', onEnd);
+      };
+      el.addEventListener('transitionend', onEnd);
+    }
+
     function makeRevealObserver(primary, rootMargin) {
       return new IntersectionObserver(function(entries, observer) {
         entries.forEach(function(entry) {
           if (!entry.isIntersecting) return;
-          var vh = window.innerHeight || document.documentElement.clientHeight;
-          var fallback = entry.boundingClientRect.top <= vh * 0.5;
-          if (entry.intersectionRatio >= primary || fallback) {
-            var el = entry.target;
-            el.classList.add('is-visible');
-            var onEnd = function(e) {
-              if (e.target !== el || e.propertyName !== 'transform') return;
-              el.style.transform = 'none';
-              el.style.willChange = 'auto';
-              el.removeEventListener('transitionend', onEnd);
-            };
-            el.addEventListener('transitionend', onEnd);
-            observer.unobserve(el);
+          if (entry.intersectionRatio >= primary) {
+            revealEl(entry.target);
+            observer.unobserve(entry.target);
           }
         });
       }, { threshold: [0, primary], rootMargin: rootMargin });
     }
 
-    // Late trigger (threshold 0.05 / rootMargin -50%): section must be halfway
-    // up the screen before it plays, so the user actually sees the animation.
-    var lateIO = makeRevealObserver(0.05, '0px 0px -50% 0px');
-    // Standard trigger (threshold 0.3 / rootMargin -30%) for the sections that
-    // already feel right; keeps the tall-section fallback.
+    // Late trigger (threshold 0.01 / rootMargin -60%): the section must be ~60%
+    // up the screen before it plays, so the user is already looking at it.
+    var lateIO = makeRevealObserver(0.01, '0px 0px -60% 0px');
+    // Logos keeps its already-correct timing (threshold 0.3 / rootMargin -30%).
     var standardIO = makeRevealObserver(0.3, '0px 0px -30% 0px');
 
     // Same MutationObserver pattern as hero: wait for React to mount the
@@ -312,10 +312,26 @@ document.addEventListener('DOMContentLoaded', async function() {
     wireReveal('about', 'about', lateIO);
     wireReveal('services', 'services', lateIO);
     wireReveal('trusted-by', 'logos', standardIO);
-    wireReveal('clients', 'ventures', standardIO);
+    wireReveal('clients', 'ventures', lateIO);
     wireReveal('seo-audit', 'seoaudit', lateIO);
-    wireReveal('reviews', 'reviews', standardIO);
+    wireReveal('reviews', 'reviews', lateIO);
     wireReveal('contact', 'contact', lateIO);
+
+    // Scroll fallback for tall sections (taller than the viewport): with a
+    // -60% margin a very tall section may never satisfy the threshold, so reveal
+    // it once its top passes 45% of the viewport. Logos and hero are excluded
+    // so their timing is untouched.
+    function revealScrollFallback() {
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var els = document.querySelectorAll('[data-reveal]:not(.is-visible)');
+      for (var i = 0; i < els.length; i++) {
+        var name = els[i].getAttribute('data-reveal');
+        if (name === 'logos' || name === 'hero') continue;
+        var rect = els[i].getBoundingClientRect();
+        if (rect.height > vh && rect.top < vh * 0.45) revealEl(els[i]);
+      }
+    }
+    window.addEventListener('scroll', revealScrollFallback, { passive: true });
     // ────────────────────────────────────────────────────────────────────────
 
     // ── Gold pulse glow: "chose us" (logos) + "AI-powered" (SEO audit) ───────
