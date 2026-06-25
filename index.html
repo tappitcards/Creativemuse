@@ -367,6 +367,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       '#services.is-visible .underline-draw::after,#services[style*="opacity: 1"] .underline-draw::after{width:100%}';
     document.head.appendChild(udStyle);
 
+    // Services description: widen so it reads as a comfortable 2-line paragraph
+    // (base .sec-sub is already 520px, which wraps to 3 lines; 620px = 2 lines).
+    var svcSubStyle = document.createElement('style');
+    svcSubStyle.textContent = '#services .sec-sub{max-width:620px}';
+    document.head.appendChild(svcSubStyle);
+
     var udWatcher = new MutationObserver(function() {
       var svc = document.getElementById('services');
       if (!svc) return;
