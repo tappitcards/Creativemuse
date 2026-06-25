@@ -446,6 +446,15 @@ document.addEventListener('DOMContentLoaded', async function() {
       '.case-study.cream .venture-line{background:linear-gradient(90deg,#295D2C,transparent)}',
       // Independent reveal: Auralis wrapper slides in from the right + fades
       '.case-study.cream{opacity:0;transform:translateX(80px);transition:opacity 1.2s cubic-bezier(0.16,1,0.3,1),transform 1.2s cubic-bezier(0.16,1,0.3,1)}',
+      // Divider between the two case studies
+      '.venture-divider{padding:80px 72px;position:relative;z-index:2}',
+      '.venture-divider-inner{max-width:1200px;margin:0 auto}',
+      '.venture-divider-rule{border:0;border-top:1px solid rgba(201,168,76,0.15);width:100%;margin:0}',
+      '.venture-divider-label{font-size:0.65rem;letter-spacing:0.2em;font-weight:600;text-align:left;text-transform:uppercase}',
+      '.venture-divider-label.v01{color:#C9A84C;margin-bottom:16px}',
+      '.venture-divider-label.v02{color:#295D2C;margin-top:16px}',
+      '@media(max-width:1024px){.venture-divider{padding:80px 36px}}',
+      '@media(max-width:600px){.venture-divider{padding:64px 24px}}',
     ].join('');
     document.head.appendChild(ventStyle);
 
@@ -498,6 +507,35 @@ document.addEventListener('DOMContentLoaded', async function() {
           textCol.parentNode.insertBefore(w2, textCol);
           w2.appendChild(textCol);
         }
+      }
+
+      // Section heading + subheading copy
+      var vcHead = section.querySelector('.vc-head');
+      if (vcHead) {
+        var h = vcHead.querySelector('.sec-title');
+        if (h) {
+          var li = h.querySelector('.line-inner') || h;
+          if (li.textContent.trim() === 'Our Ventures') li.textContent = 'Brands We Build';
+        }
+        var sub = vcHead.querySelector('.vc-sub');
+        if (sub && /market businesses/.test(sub.textContent)) {
+          sub.textContent = "We don't just market businesses — we build them. Two brands we own, operate, and grow from the ground up.";
+        }
+      }
+
+      // Visual divider between Tappit and Auralis (direct child of #clients,
+      // inserted before the Auralis case study).
+      var auralisCase = section.querySelector('.case-study.cream');
+      if (auralisCase && !section.querySelector('.venture-divider')) {
+        var divider = document.createElement('div');
+        divider.className = 'venture-divider';
+        divider.innerHTML =
+          '<div class="venture-divider-inner">' +
+          '<div class="venture-divider-label v01">Venture 01</div>' +
+          '<hr class="venture-divider-rule">' +
+          '<div class="venture-divider-label v02">Venture 02</div>' +
+          '</div>';
+        section.insertBefore(divider, auralisCase);
       }
 
       // Independent scroll reveal for the Auralis (cream) case study — slides in
