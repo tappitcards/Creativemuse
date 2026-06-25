@@ -425,6 +425,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       '.v-text-left{transform:translateX(-80px)}',
       '#clients[style*="opacity: 1"] .venture-slide{transform:translateX(0)}',
       '.case-study.cream .venture-slide{transition-delay:0.3s}',
+      // Auralis (cream/light bg) only — darker tones so number + line stay visible
+      '.case-study.cream .venture-num{color:rgba(100,80,40,0.06)}',
+      '.case-study.cream .venture-line{background:linear-gradient(90deg,#8B6D38,transparent)}',
     ].join('');
     document.head.appendChild(ventStyle);
 
