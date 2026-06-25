@@ -154,6 +154,15 @@ document.addEventListener('DOMContentLoaded', async function() {
       old.replaceWith(s);
       if (p) await p;
     }
+    // Hide the reveal sections from FIRST PAINT — inject before React renders,
+    // so the rule is already in place the moment React creates these elements.
+    // (#trusted-by is excluded; the logos blur fade is handled separately.)
+    var preHideStyle = document.createElement('style');
+    preHideStyle.textContent =
+      '#about,#services,#clients,#seo-audit,#reviews,#contact{opacity:0;transform:translateY(50px);' +
+      'transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}';
+    document.head.appendChild(preHideStyle);
+
     // Babel standalone auto-transforms type=text/babel on DOMContentLoaded,
     // which fired before we swapped the document. Trigger manually if present.
     if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
@@ -258,19 +267,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // ────────────────────────────────────────────────────────────────────────
 
     // ── Section reveals (About, Services, Ventures, SEO, Reviews, Contact) ───
-    // Plain scroll-event listener with inline styles applied after React has
-    // fully mounted — no IntersectionObserver/MutationObserver, nothing for the
-    // bundle to clobber. (#trusted-by is intentionally excluded so the logos
-    // blur fade above is left untouched.)
+    // Sections are already hidden from first paint by preHideStyle above. Here
+    // we only handle the reveal: when a section's top passes 60% of the viewport
+    // height, set inline opacity/transform to the visible end-state (inline
+    // overrides the stylesheet) and the CSS transition animates it in.
+    // (#trusted-by is excluded — the logos blur fade is handled separately.)
     function initReveal() {
       var sections = document.querySelectorAll('#about, #services, #clients, #seo-audit, #reviews, #contact');
-
-      // Set initial hidden state
-      sections.forEach(function(el) {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(50px)';
-        el.style.transition = 'opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1)';
-      });
 
       function checkSections() {
         sections.forEach(function(el) {
@@ -288,8 +291,15 @@ document.addEventListener('DOMContentLoaded', async function() {
       checkSections();
     }
 
-    // Wait for React to finish rendering then init
-    setTimeout(initReveal, 3000);
+    // Run initReveal as soon as React has mounted #about (max 5s wait).
+    (function waitForMount() {
+      if (document.getElementById('about')) { initReveal(); return; }
+      var obs = new MutationObserver(function() {
+        if (document.getElementById('about')) { clearTimeout(maxWait); obs.disconnect(); initReveal(); }
+      });
+      var maxWait = setTimeout(function() { obs.disconnect(); initReveal(); }, 5000);
+      obs.observe(document.body, { childList: true, subtree: true });
+    })();
     // ────────────────────────────────────────────────────────────────────────
 
     // ── Gold pulse glow: "chose us" (logos) + "AI-powered" (SEO audit) ───────
@@ -322,25 +332,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (titleDone && emDone) glowWatcher.disconnect();
     });
     glowWatcher.observe(document.body, { childList: true, subtree: true });
-    // ────────────────────────────────────────────────────────────────────────
-
-    // ── TEMP DEBUG: reveal diagnostic ────────────────────────────────────────
-    setTimeout(function() {
-      var about = document.querySelector('#about');
-      if (!about) { console.log('DEBUG: #about not found'); return; }
-      console.log('DEBUG: #about found');
-      console.log('DEBUG: current opacity:', about.style.opacity);
-      console.log('DEBUG: computed opacity:', getComputedStyle(about).opacity);
-      console.log('DEBUG: getBoundingClientRect top:', about.getBoundingClientRect().top);
-      console.log('DEBUG: window.innerHeight:', window.innerHeight);
-      about.style.opacity = '0';
-      about.style.transition = 'opacity 2s ease';
-      console.log('DEBUG: set opacity to 0, waiting 1s then setting to 1');
-      setTimeout(function() {
-        about.style.opacity = '1';
-        console.log('DEBUG: set opacity to 1');
-      }, 1000);
-    }, 4000);
     // ────────────────────────────────────────────────────────────────────────
 
   } catch (err) {
