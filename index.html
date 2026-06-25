@@ -229,109 +229,67 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
     cmWatcher.observe(document.body, { childList: true, subtree: true });
 
-    // ── Section scroll reveals (About → Contact) ───────────────────────────
-    // Container-only strategy: every reveal targets the plain <section> wrapper,
-    // never a Framer-controlled child. Framer keeps animating its own children
-    // (stagger grids, RevealLines, SpotlightCard tilt/hover, parallax) exactly
-    // as on the live site — we just fade/scale the section shell in on scroll.
+    // ── Logos blur-fade reveal (UNCHANGED — kept on its working observer) ────
     var sectionStyle = document.createElement('style');
     sectionStyle.textContent = [
-      // About — fade up
-      '[data-reveal="about"]{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}',
-      '[data-reveal="about"].is-visible{opacity:1;transform:translateY(0)}',
-      // Services — container fade up (Framer controls the cards; do not touch them)
-      '[data-reveal="services"]{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}',
-      '[data-reveal="services"].is-visible{opacity:1;transform:translateY(0)}',
-      // Logos — blur fade
       '[data-reveal="logos"]{opacity:0;filter:blur(8px);transform:translateY(20px);transition:opacity 0.9s ease,filter 0.9s ease,transform 0.9s ease}',
       '[data-reveal="logos"].is-visible{opacity:1;filter:blur(0);transform:translateY(0)}',
-      // Ventures — fade up
-      '[data-reveal="ventures"]{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}',
-      '[data-reveal="ventures"].is-visible{opacity:1;transform:translateY(0)}',
-      // SEO Audit — scale reveal
-      '[data-reveal="seoaudit"]{opacity:0;transform:scale(0.97);transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1),transform 0.8s cubic-bezier(0.16,1,0.3,1)}',
-      '[data-reveal="seoaudit"].is-visible{opacity:1;transform:scale(1)}',
-      // Reviews — fade up
-      '[data-reveal="reviews"]{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease}',
-      '[data-reveal="reviews"].is-visible{opacity:1;transform:translateY(0)}',
-      // Contact — soft rise
-      '[data-reveal="contact"]{opacity:0;transform:translateY(60px);transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}',
-      '[data-reveal="contact"].is-visible{opacity:1;transform:translateY(0)}',
     ].join('');
     document.head.appendChild(sectionStyle);
 
-    // Reveal one section: add .is-visible (once) and, on completion, clear the
-    // lingering compositing layer — the generic [data-reveal] rule leaves
-    // will-change:transform plus a residual transform on the container, which
-    // can freeze a child's whileHover repaint (the stuck srv-card hover). A
-    // transitionend reset of transform:none + will-change:auto dissolves it.
-    function revealEl(el) {
-      if (el.classList.contains('is-visible')) return;
-      el.classList.add('is-visible');
-      var onEnd = function(e) {
-        if (e.target !== el || e.propertyName !== 'transform') return;
-        el.style.transform = 'none';
-        el.style.willChange = 'auto';
-        el.removeEventListener('transitionend', onEnd);
-      };
-      el.addEventListener('transitionend', onEnd);
-    }
-
-    function makeRevealObserver(primary, rootMargin) {
-      return new IntersectionObserver(function(entries, observer) {
-        entries.forEach(function(entry) {
-          if (!entry.isIntersecting) return;
-          if (entry.intersectionRatio >= primary) {
-            revealEl(entry.target);
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: [0, primary], rootMargin: rootMargin });
-    }
-
-    // Late trigger (threshold 0.01 / rootMargin -60%): the section must be ~60%
-    // up the screen before it plays, so the user is already looking at it.
-    var lateIO = makeRevealObserver(0.01, '0px 0px -60% 0px');
-    // Logos keeps its already-correct timing (threshold 0.3 / rootMargin -30%).
-    var standardIO = makeRevealObserver(0.3, '0px 0px -30% 0px');
-
-    // Same MutationObserver pattern as hero: wait for React to mount the
-    // section, tag the container, hand it to the chosen observer.
-    function wireReveal(id, name, io) {
-      var w = new MutationObserver(function() {
-        var el = document.getElementById(id);
-        if (el) {
-          el.setAttribute('data-reveal', name);
-          io.observe(el);
-          w.disconnect();
+    var logosIO = new IntersectionObserver(function(entries, observer) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
         }
       });
-      w.observe(document.body, { childList: true, subtree: true });
-    }
+    }, { threshold: [0, 0.3], rootMargin: '0px 0px -30% 0px' });
 
-    wireReveal('about', 'about', lateIO);
-    wireReveal('services', 'services', lateIO);
-    wireReveal('trusted-by', 'logos', standardIO);
-    wireReveal('clients', 'ventures', lateIO);
-    wireReveal('seo-audit', 'seoaudit', lateIO);
-    wireReveal('reviews', 'reviews', lateIO);
-    wireReveal('contact', 'contact', lateIO);
-
-    // Scroll fallback for tall sections (taller than the viewport): with a
-    // -60% margin a very tall section may never satisfy the threshold, so reveal
-    // it once its top passes 45% of the viewport. Logos and hero are excluded
-    // so their timing is untouched.
-    function revealScrollFallback() {
-      var vh = window.innerHeight || document.documentElement.clientHeight;
-      var els = document.querySelectorAll('[data-reveal]:not(.is-visible)');
-      for (var i = 0; i < els.length; i++) {
-        var name = els[i].getAttribute('data-reveal');
-        if (name === 'logos' || name === 'hero') continue;
-        var rect = els[i].getBoundingClientRect();
-        if (rect.height > vh && rect.top < vh * 0.45) revealEl(els[i]);
+    var logosWatcher = new MutationObserver(function() {
+      var el = document.getElementById('trusted-by');
+      if (el) {
+        el.setAttribute('data-reveal', 'logos');
+        logosIO.observe(el);
+        logosWatcher.disconnect();
       }
+    });
+    logosWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
+    // ── Section reveals (About, Services, Ventures, SEO, Reviews, Contact) ───
+    // Plain scroll-event listener with inline styles applied after React has
+    // fully mounted — no IntersectionObserver/MutationObserver, nothing for the
+    // bundle to clobber. (#trusted-by is intentionally excluded so the logos
+    // blur fade above is left untouched.)
+    function initReveal() {
+      var sections = document.querySelectorAll('#about, #services, #clients, #seo-audit, #reviews, #contact');
+
+      // Set initial hidden state
+      sections.forEach(function(el) {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(50px)';
+        el.style.transition = 'opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1)';
+      });
+
+      function checkSections() {
+        sections.forEach(function(el) {
+          if (el.style.opacity === '1') return;
+          var rect = el.getBoundingClientRect();
+          // Trigger when section top reaches 40% from bottom of viewport
+          if (rect.top < window.innerHeight * 0.6) {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          }
+        });
+      }
+
+      window.addEventListener('scroll', checkSections, { passive: true });
+      checkSections();
     }
-    window.addEventListener('scroll', revealScrollFallback, { passive: true });
+
+    // Wait for React to finish rendering then init
+    setTimeout(initReveal, 3000);
     // ────────────────────────────────────────────────────────────────────────
 
     // ── Gold pulse glow: "chose us" (logos) + "AI-powered" (SEO audit) ───────
