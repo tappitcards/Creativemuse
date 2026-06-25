@@ -324,6 +324,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     glowWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
+    // ── TEMP DEBUG: reveal diagnostic ────────────────────────────────────────
+    setTimeout(function() {
+      var about = document.querySelector('#about');
+      if (!about) { console.log('DEBUG: #about not found'); return; }
+      console.log('DEBUG: #about found');
+      console.log('DEBUG: current opacity:', about.style.opacity);
+      console.log('DEBUG: computed opacity:', getComputedStyle(about).opacity);
+      console.log('DEBUG: getBoundingClientRect top:', about.getBoundingClientRect().top);
+      console.log('DEBUG: window.innerHeight:', window.innerHeight);
+      about.style.opacity = '0';
+      about.style.transition = 'opacity 2s ease';
+      console.log('DEBUG: set opacity to 0, waiting 1s then setting to 1');
+      setTimeout(function() {
+        about.style.opacity = '1';
+        console.log('DEBUG: set opacity to 1');
+      }, 1000);
+    }, 4000);
+    // ────────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
