@@ -201,6 +201,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
+          // Dissolve the persistent will-change layer once revealed — a lingering
+          // will-change:transform on the hero container freezes the descendant
+          // hero cards' whileHover repaint after the first interaction.
+          entry.target.style.willChange = 'auto';
           revealIO.unobserve(entry.target);
         }
       });
@@ -225,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // parallax div with translateZ(0)!important so Framer's x offset is overridden
     // from first paint and no entrance translateX/Y can shift the card.
     var cmStyle = document.createElement('style');
-    cmStyle.textContent = '.cm-fixed{transform:translateZ(0)!important;will-change:transform;transition:none!important}';
+    cmStyle.textContent = '.cm-fixed{transform:translateZ(0)!important;transition:none!important}';
     document.head.appendChild(cmStyle);
 
     var cmWatcher = new MutationObserver(function() {
@@ -306,6 +310,21 @@ document.addEventListener('DOMContentLoaded', async function() {
           if (rect.top < window.innerHeight * 0.6) {
             el.style.opacity = '1';
             el.style.transform = END[el.id] || 'none';
+            // About & Services: once the reveal finishes, clear the residual
+            // transform so the container stops being its own composited layer —
+            // otherwise the persistent transform freezes child card whileHover
+            // repaint (stuck hero/service card hover after first interaction).
+            if (el.id === 'about' || el.id === 'services') {
+              (function(node) {
+                var clear = function(ev) {
+                  if (ev.target !== node || ev.propertyName !== 'transform') return;
+                  node.style.transform = 'none';
+                  node.style.willChange = 'auto';
+                  node.removeEventListener('transitionend', clear);
+                };
+                node.addEventListener('transitionend', clear);
+              })(el);
+            }
           }
         });
       }
@@ -372,6 +391,41 @@ document.addEventListener('DOMContentLoaded', async function() {
     var svcSubStyle = document.createElement('style');
     svcSubStyle.textContent = '#services .sec-sub{max-width:620px}';
     document.head.appendChild(svcSubStyle);
+
+    // ── About visual enhancements ────────────────────────────────────────────
+    var aboutStyle = document.createElement('style');
+    aboutStyle.textContent = [
+      // Gold top line per right-side card (injected real div, since .about-card
+      // is a Framer SpotlightCard). Draws 0->100% when About reveals.
+      '#about .about-card-line{width:0%;height:2px;background:linear-gradient(90deg,#C9A84C,transparent);transition:width 0.8s cubic-bezier(0.16,1,0.3,1);margin-bottom:20px}',
+      '#about.is-visible .about-card-line,#about[style*="opacity: 1"] .about-card-line{width:100%}',
+      // Italic quote becomes the gold visual anchor
+      '#about .about-narrative .lead{color:#C9A84C}',
+      // Thin vertical gold separator between the left text and right cards
+      '#about .about-inner{position:relative}',
+      '#about .about-inner::after{content:"";position:absolute;top:10%;bottom:10%;left:50%;width:1px;background:linear-gradient(180deg,transparent,rgba(201,168,76,0.3),transparent);pointer-events:none}',
+      '@media(max-width:768px){#about .about-inner::after{display:none}}',
+    ].join('');
+    document.head.appendChild(aboutStyle);
+
+    var aboutCardWatcher = new MutationObserver(function() {
+      var about = document.getElementById('about');
+      if (!about) return;
+      var cards = about.querySelectorAll('.about-card');
+      if (cards.length < 3) return;
+      var delays = ['0.1s', '0.25s', '0.4s'];
+      for (var i = 0; i < cards.length; i++) {
+        if (!cards[i].querySelector('.about-card-line')) {
+          var ln = document.createElement('div');
+          ln.className = 'about-card-line';
+          ln.style.transitionDelay = delays[i] || '0.4s';
+          cards[i].insertBefore(ln, cards[i].firstChild);
+        }
+      }
+      aboutCardWatcher.disconnect();
+    });
+    aboutCardWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
 
     var udWatcher = new MutationObserver(function() {
       var svc = document.getElementById('services');
