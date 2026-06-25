@@ -156,11 +156,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     // Hide the reveal sections from FIRST PAINT — inject before React renders,
     // so the rule is already in place the moment React creates these elements.
+    // Shared hidden state is opacity:0; each section gets its own starting
+    // transform + transition for a distinct reveal personality.
     // (#trusted-by is excluded; the logos blur fade is handled separately.)
     var preHideStyle = document.createElement('style');
-    preHideStyle.textContent =
-      '#about,#services,#clients,#seo-audit,#reviews,#contact{opacity:0;transform:translateY(50px);' +
-      'transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}';
+    preHideStyle.textContent = [
+      '#about,#services,#clients,#seo-audit,#reviews,#contact{opacity:0}',
+      // About — slide in from left
+      '#about{transform:translateX(-60px);transition:opacity 1.2s cubic-bezier(0.16,1,0.3,1),transform 1.2s cubic-bezier(0.16,1,0.3,1)}',
+      // Services — scale up from slightly small
+      '#services{transform:scale(0.94);transition:opacity 1s cubic-bezier(0.16,1,0.3,1),transform 1s cubic-bezier(0.16,1,0.3,1)}',
+      // Ventures — fade up slower and further
+      '#clients{transform:translateY(80px);transition:opacity 1.4s cubic-bezier(0.16,1,0.3,1),transform 1.4s cubic-bezier(0.16,1,0.3,1)}',
+      // SEO Audit — slide in from right
+      '#seo-audit{transform:translateX(60px);transition:opacity 1.2s cubic-bezier(0.16,1,0.3,1),transform 1.2s cubic-bezier(0.16,1,0.3,1)}',
+      // Reviews — scale up with slight rotation
+      '#reviews{transform:scale(0.96) rotate(1deg);transition:opacity 1s ease,transform 1s ease}',
+      // Contact — fade up with longer travel
+      '#contact{transform:translateY(100px);transition:opacity 1.4s cubic-bezier(0.16,1,0.3,1),transform 1.4s cubic-bezier(0.16,1,0.3,1)}',
+    ].join('');
     document.head.appendChild(preHideStyle);
 
     // Babel standalone auto-transforms type=text/babel on DOMContentLoaded,
@@ -274,6 +288,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     // (#trusted-by is excluded — the logos blur fade is handled separately.)
     function initReveal() {
       var sections = document.querySelectorAll('#about, #services, #clients, #seo-audit, #reviews, #contact');
+      // Section-specific visible end-state transform (matches each start above).
+      var END = {
+        'about': 'translateX(0)',
+        'services': 'scale(1)',
+        'clients': 'translateY(0)',
+        'seo-audit': 'translateX(0)',
+        'reviews': 'scale(1) rotate(0deg)',
+        'contact': 'translateY(0)'
+      };
 
       function checkSections() {
         sections.forEach(function(el) {
@@ -282,7 +305,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           // Trigger when section top reaches 40% from bottom of viewport
           if (rect.top < window.innerHeight * 0.6) {
             el.style.opacity = '1';
-            el.style.transform = 'translateY(0)';
+            el.style.transform = END[el.id] || 'none';
           }
         });
       }
