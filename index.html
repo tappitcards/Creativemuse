@@ -357,6 +357,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     glowWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
+    // ── Services heading: gold underline that draws L→R after reveal ─────────
+    var udStyle = document.createElement('style');
+    udStyle.textContent =
+      '.underline-draw{position:relative;display:inline-block}' +
+      '.underline-draw::after{content:"";position:absolute;bottom:-4px;left:0;width:0%;height:2px;' +
+      'background:linear-gradient(90deg,#C9A84C,#E8D48B,#C9A84C);' +
+      'transition:width 1.2s cubic-bezier(0.16,1,0.3,1);transition-delay:0.4s}' +
+      '#services.is-visible .underline-draw::after,#services[style*="opacity: 1"] .underline-draw::after{width:100%}';
+    document.head.appendChild(udStyle);
+
+    var udWatcher = new MutationObserver(function() {
+      var svc = document.getElementById('services');
+      if (!svc) return;
+      var title = svc.querySelector('.sec-title');
+      if (!title) return;
+      if (title.querySelector('.underline-draw')) { udWatcher.disconnect(); return; }
+      var ems = title.querySelectorAll('em');
+      for (var i = 0; i < ems.length; i++) {
+        if (/landscape/i.test(ems[i].textContent)) {
+          var span = document.createElement('span');
+          span.className = 'underline-draw';
+          ems[i].parentNode.insertBefore(span, ems[i]);
+          span.appendChild(ems[i]);
+          udWatcher.disconnect();
+          break;
+        }
+      }
+    });
+    udWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
