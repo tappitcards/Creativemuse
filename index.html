@@ -388,6 +388,103 @@ document.addEventListener('DOMContentLoaded', async function() {
     udWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
+    // ── Ventures (#clients) premium upgrade ──────────────────────────────────
+    // Visual-only. Real class names: .case-study(.dark/.cream), .case-inner,
+    // .case-img-wrap (Framer), text Reveal (Framer), .case-tags/.case-tag,
+    // .btn-venture (Framer). Image & text are Framer-controlled and share the
+    // non-Framer .case-inner, so directional slides are applied to injected
+    // non-Framer wrapper divs (the fx-revealed safety net would wipe transforms
+    // set on [data-rv] elements directly).
+    var ventStyle = document.createElement('style');
+    ventStyle.textContent = [
+      // Layout 55/45 (desktop only — keep mobile single-column stacking)
+      '@media(min-width:901px){#clients .case-inner{grid-template-columns:minmax(0,55fr) minmax(0,45fr)}}',
+      // Asymmetric image radius: outer edge squared, inner edge rounded (override Framer inline)
+      '.case-study.dark .case-img-wrap > div:not(.case-img-bracket){border-radius:0 var(--r-xl) var(--r-xl) 0!important}',
+      '.case-study.cream .case-img-wrap > div:not(.case-img-bracket){border-radius:var(--r-xl) 0 0 var(--r-xl)!important}',
+      // Vertical separation between the two case studies (desktop)
+      '@media(min-width:901px){.ventures-cases .case-study + .case-study{margin-top:140px}}',
+      // Editorial number overlay
+      '.venture-num{position:absolute;font-size:clamp(120px,18vw,220px);font-weight:800;color:rgba(201,168,76,0.04);line-height:1;pointer-events:none;z-index:0;top:-20px;letter-spacing:-0.05em}',
+      '.venture-num-left{left:0}',
+      '.venture-num-right{right:0}',
+      // Gold top line that draws in on reveal
+      '.venture-line{width:0%;height:1px;background:linear-gradient(90deg,#C9A84C,transparent);transition:width 1.4s cubic-bezier(0.16,1,0.3,1);margin-bottom:48px;position:relative;z-index:2}',
+      '#clients.is-visible .venture-line,#clients[style*="opacity: 1"] .venture-line{width:100%}',
+      // Tag hover (real class .case-tag)
+      '#clients .case-tag{transition:border-color .3s ease,color .3s ease,background .3s ease}',
+      '#clients .case-tag:hover{border-color:#C9A84C;color:#C9A84C;background:rgba(201,168,76,0.06)}',
+      // Gold pill CTA (real class .btn-venture; id scope beats .btn-venture.on-* variants)
+      '#clients .btn-venture{background:transparent;border:1.5px solid #C9A84C;color:#C9A84C;padding:14px 32px;border-radius:40px;font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;transition:all 0.3s ease;display:inline-flex;align-items:center;gap:10px}',
+      '#clients .btn-venture:hover{background:#C9A84C;color:#000;border-color:#C9A84C}',
+      // Directional slide wrappers (non-Framer divs we inject)
+      '.venture-slide{transition:transform 1.2s cubic-bezier(0.16,1,0.3,1)}',
+      '.v-img-left{transform:translateX(-80px)}',
+      '.v-img-right{transform:translateX(80px)}',
+      '.v-text-right{transform:translateX(80px)}',
+      '.v-text-left{transform:translateX(-80px)}',
+      '#clients[style*="opacity: 1"] .venture-slide{transform:translateX(0)}',
+      '.case-study.cream .venture-slide{transition-delay:0.3s}',
+    ].join('');
+    document.head.appendChild(ventStyle);
+
+    var ventWatcher = new MutationObserver(function() {
+      var section = document.getElementById('clients');
+      if (!section) return;
+      if (section.getAttribute('data-vent-enhanced')) { ventWatcher.disconnect(); return; }
+      var cases = section.querySelectorAll('.case-study');
+      if (cases.length < 2) return;
+      // wait until both inner grids have mounted with their columns
+      for (var c = 0; c < cases.length; c++) {
+        var inr = cases[c].querySelector('.case-inner');
+        if (!inr || !inr.querySelector('.case-img-wrap') || !inr.querySelector('.case-tags')) return;
+      }
+
+      for (var i = 0; i < cases.length; i++) {
+        var cs = cases[i];
+        var isFirst = cs.classList.contains('dark'); // Tappit = dark, Auralis = cream
+        var inner = cs.querySelector('.case-inner');
+
+        // Editorial number (absolute, behind content)
+        if (!cs.querySelector('.venture-num')) {
+          var num = document.createElement('div');
+          num.className = 'venture-num ' + (isFirst ? 'venture-num-left' : 'venture-num-right');
+          num.textContent = isFirst ? '01' : '02';
+          cs.insertBefore(num, cs.firstChild);
+        }
+        // Gold top line (in-flow, before the grid)
+        if (!cs.querySelector('.venture-line')) {
+          var line = document.createElement('div');
+          line.className = 'venture-line';
+          cs.insertBefore(line, inner);
+        }
+        // Tags above brand name: move .case-tags to first child of the text column
+        var tags = inner.querySelector('.case-tags');
+        var textCol = tags ? tags.parentElement : null;
+        if (tags && textCol && textCol.firstChild !== tags) textCol.insertBefore(tags, textCol.firstChild);
+
+        // Directional slide wrappers around the Framer image + text columns
+        var imgCol = inner.querySelector('.case-img-wrap');
+        if (imgCol && !imgCol.parentElement.classList.contains('venture-slide')) {
+          var w1 = document.createElement('div');
+          w1.className = 'venture-slide ' + (isFirst ? 'v-img-left' : 'v-img-right');
+          imgCol.parentNode.insertBefore(w1, imgCol);
+          w1.appendChild(imgCol);
+        }
+        if (textCol && !textCol.parentElement.classList.contains('venture-slide')) {
+          var w2 = document.createElement('div');
+          w2.className = 'venture-slide ' + (isFirst ? 'v-text-right' : 'v-text-left');
+          textCol.parentNode.insertBefore(w2, textCol);
+          w2.appendChild(textCol);
+        }
+      }
+
+      section.setAttribute('data-vent-enhanced', '1');
+      ventWatcher.disconnect();
+    });
+    ventWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
