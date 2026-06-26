@@ -819,50 +819,97 @@ document.addEventListener('DOMContentLoaded', async function() {
     // ────────────────────────────────────────────────────────────────────────
 
     // ── Animation 1: hero cards fall in sequence on load (opacity only) ──────
-    // Framer controls the WRAPPER opacity/transform; the inner .result-card
-    // opacity is free, so an opacity-only sequence here never conflicts with
-    // Framer, never touches the .cm-fixed pin, and leaves hover/parallax intact.
+    // Opacity-only entrance on the inner .result-card (Framer drives the wrapper
+    // + the card's hover transform). CRITICAL: once each card finishes fading in
+    // we release ALL of our styling — remove the injected stylesheet and clear
+    // inline opacity/transition — so Framer regains full control of hover and
+    // nothing stays on a transition/compositing lock. The .cm-fixed pin is never
+    // touched (we only style the inner .result-card).
     var heroCardStyle = document.createElement('style');
     heroCardStyle.textContent =
       '.hero-cards .result-card{opacity:0;transition:opacity 1.2s cubic-bezier(0.16,1,0.3,1)}' +
       '.hero-cards .result-card.hero-card-in{opacity:1}';
     document.head.appendChild(heroCardStyle);
 
-    var heroCardsRevealed = false;
+    var heroCardsRevealed = false, heroCleared = false;
+    function clearHeroLocks(cards) {
+      if (heroCleared) return;
+      heroCleared = true;
+      if (heroCardStyle.parentNode) heroCardStyle.parentNode.removeChild(heroCardStyle);
+      for (var k = 0; k < cards.length; k++) {
+        cards[k].classList.remove('hero-card-in');
+        cards[k].style.opacity = '';
+        cards[k].style.transition = '';
+        cards[k].style.willChange = '';
+      }
+    }
     var heroCardWatcher = new MutationObserver(function() {
       if (heroCardsRevealed) { heroCardWatcher.disconnect(); return; }
       var cards = document.querySelectorAll('.hero-cards .result-card');
       if (cards.length < 3) return;
       heroCardsRevealed = true;
       heroCardWatcher.disconnect();
-      // top (0ms), middle (200ms), bottom (400ms)
+      var done = 0;
       for (var i = 0; i < cards.length; i++) {
-        (function(c, idx) { setTimeout(function() { c.classList.add('hero-card-in'); }, idx * 350); })(cards[i], i);
+        (function(c, idx) {
+          setTimeout(function() {
+            c.classList.add('hero-card-in');
+            var onEnd = function(e) {
+              if (e.target !== c || e.propertyName !== 'opacity') return;
+              c.removeEventListener('transitionend', onEnd);
+              if (++done >= cards.length) clearHeroLocks(cards);
+            };
+            c.addEventListener('transitionend', onEnd);
+          }, idx * 350);
+        })(cards[i], i);
       }
-      // safety: never leave a card hidden if a timer is throttled
-      setTimeout(function() { for (var k = 0; k < cards.length; k++) cards[k].classList.add('hero-card-in'); }, 3000);
+      // Fallback: release locks even if a transitionend never fires.
+      setTimeout(function() { clearHeroLocks(cards); }, 350 * cards.length + 1200 + 800);
     });
     heroCardWatcher.observe(document.body, { childList: true, subtree: true });
 
     // ── Animation 2: service cards stagger on first scroll-in (blur only) ────
-    // Uses filter:blur (NOT opacity) so it never touches Framer's opacity/
-    // transform hover state. The revealed state is applied as an INLINE filter
-    // (not a class) because SpotlightCard re-renders on hover (setLit) and would
-    // strip any injected class — which is what blanked the cards before. React/
-    // Framer don't manage `filter`, so the inline value survives hover.
+    // Blur (not opacity) so it never collides with Framer's opacity/transform.
+    // The base blur rule is gated to #services:not(.srv-revealed) so it stops
+    // applying after reveal; the per-card reveal sets an INLINE filter:blur(0).
+    // Once every card finishes, we add .srv-revealed (base rule off) AND clear
+    // the inline filter — leaving NO filter at all so Framer fully owns hover.
     var srvCardStyle = document.createElement('style');
-    srvCardStyle.textContent = '.srv-card{filter:blur(6px);transition:filter 0.6s ease}';
+    srvCardStyle.textContent = '#services:not(.srv-revealed) .srv-card{filter:blur(6px);transition:filter 0.6s ease}';
     document.head.appendChild(srvCardStyle);
 
-    var serviceCardsRevealed = false;
-    function runServiceStagger() {
+    var serviceCardsRevealed = false, srvCleared = false;
+    function clearSrvLocks(svc, cards) {
+      if (srvCleared) return;
+      srvCleared = true;
+      svc.classList.add('srv-revealed'); // base blur rule no longer applies
+      for (var k = 0; k < cards.length; k++) {
+        cards[k].style.filter = '';
+        cards[k].style.transition = '';
+        cards[k].style.willChange = '';
+      }
+    }
+    function runServiceStagger(svc) {
       if (serviceCardsRevealed) return;
-      var cards = document.querySelectorAll('#services .srv-card');
+      var cards = svc.querySelectorAll('.srv-card');
       if (!cards.length) return;
       serviceCardsRevealed = true;
+      var done = 0;
       for (var i = 0; i < cards.length; i++) {
-        (function(c, idx) { setTimeout(function() { c.style.filter = 'blur(0px)'; }, idx * 150); })(cards[i], i);
+        (function(c, idx) {
+          setTimeout(function() {
+            c.style.filter = 'blur(0px)';
+            var onEnd = function(e) {
+              if (e.target !== c || e.propertyName !== 'filter') return;
+              c.removeEventListener('transitionend', onEnd);
+              if (++done >= cards.length) clearSrvLocks(svc, cards);
+            };
+            c.addEventListener('transitionend', onEnd);
+          }, idx * 150);
+        })(cards[i], i);
       }
+      // Fallback: release locks even if a transitionend never fires.
+      setTimeout(function() { clearSrvLocks(svc, cards); }, 150 * cards.length + 600 + 800);
     }
     // Trigger once #services is revealed (its inline style gains opacity: 1).
     var srvSetup = new MutationObserver(function() {
@@ -870,7 +917,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (!svc) return;
       srvSetup.disconnect();
       var check = function() {
-        if (/opacity:\s*1/.test(svc.getAttribute('style') || '')) { runServiceStagger(); return true; }
+        if (/opacity:\s*1/.test(svc.getAttribute('style') || '')) { runServiceStagger(svc); return true; }
         return false;
       };
       if (check()) return;
