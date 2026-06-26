@@ -663,6 +663,146 @@ document.addEventListener('DOMContentLoaded', async function() {
     contactFlagWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
+    // ── Legal modals: Privacy Policy & Terms (wired to footer-legal links) ───
+    var legalStyle = document.createElement('style');
+    legalStyle.textContent = [
+      '.cm-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:24px}',
+      '.cm-modal.open{display:flex}',
+      '.cm-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}',
+      '.cm-modal-panel{position:relative;z-index:1;background:#14141a;border:1px solid rgba(201,168,76,0.18);border-radius:16px;max-width:760px;width:100%;max-height:85vh;overflow-y:auto;padding:48px 48px 56px;box-shadow:0 30px 80px rgba(0,0,0,0.55)}',
+      '.cm-modal-close{position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(201,168,76,0.3);background:transparent;color:#C9A84C;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:all .25s;z-index:2}',
+      '.cm-modal-close:hover{background:#C9A84C;color:#0D0D0D;border-color:#C9A84C}',
+      '.cm-modal h2{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:34px;font-weight:600;color:#fff;letter-spacing:-0.5px;margin:0 0 6px}',
+      '.cm-modal-dates{font-family:\'DM Sans\',sans-serif;font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:30px;letter-spacing:0.3px}',
+      '.cm-modal h3{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:21px;font-weight:600;color:#C9A84C;margin:26px 0 10px}',
+      '.cm-modal h3 .cm-num{font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;color:#C9A84C;letter-spacing:1px;margin-right:8px}',
+      '.cm-modal p{font-family:\'DM Sans\',sans-serif;font-size:14px;line-height:1.75;color:rgba(255,255,255,0.6);margin:0 0 10px}',
+      '.cm-modal ul{margin:8px 0 12px;padding-left:20px}',
+      '.cm-modal li{font-family:\'DM Sans\',sans-serif;font-size:14px;line-height:1.7;color:rgba(255,255,255,0.6);margin-bottom:6px}',
+      '.cm-modal a{color:#C9A84C;text-decoration:none}',
+      '.cm-modal a:hover{text-decoration:underline}',
+      '.cm-modal strong{color:rgba(255,255,255,0.85);font-weight:600}',
+      'body.cm-modal-lock{overflow:hidden}',
+      '@media(max-width:600px){.cm-modal{padding:12px}.cm-modal-panel{padding:34px 22px 42px}.cm-modal h2{font-size:28px}}',
+    ].join('');
+    document.head.appendChild(legalStyle);
+
+    var privacyHTML =
+      '<h2>Privacy Policy</h2>' +
+      '<div class="cm-modal-dates">Effective Date: June 26, 2026 &nbsp;·&nbsp; Last Updated: June 26, 2026</div>' +
+      '<h3><span class="cm-num">1.</span>Who We Are</h3>' +
+      '<p>Creative Muse Marketing is a trading name of Musetech Solutions FZCO, a Free Zone Company registered in Dubai, United Arab Emirates. Our registered address is in the relevant Dubai Free Zone. When we refer to "we", "us" or "our" in this policy, we mean Musetech Solutions FZCO operating as Creative Muse Marketing.</p>' +
+      '<p>Our website is creativemuse.co.</p>' +
+      '<h3><span class="cm-num">2.</span>What Information We Collect</h3>' +
+      '<p>We collect information you provide directly to us, including:</p>' +
+      '<ul><li>Your name and email address when you submit our contact or free audit form</li><li>Your company name and website URL when requesting an audit</li><li>Your message content when you contact us</li><li>Technical data including IP address, browser type, device type, and pages visited</li></ul>' +
+      '<p>We do not collect payment information directly — any transactions are handled by third-party processors.</p>' +
+      '<h3><span class="cm-num">3.</span>How We Use Your Information</h3>' +
+      '<p>We use the information we collect to:</p>' +
+      '<ul><li>Respond to your enquiries and deliver requested services</li><li>Send you the free SEO audit you requested</li><li>Follow up on proposals or service discussions</li><li>Improve our website and services</li><li>Comply with legal obligations</li></ul>' +
+      '<p>We do not sell your personal data to third parties. We do not use your data for automated decision-making or profiling.</p>' +
+      '<h3><span class="cm-num">4.</span>Legal Basis for Processing</h3>' +
+      '<p>We process your data on the following legal bases:</p>' +
+      '<ul><li><strong>Consent</strong> — when you submit a form you are consenting to us contacting you</li><li><strong>Legitimate interests</strong> — to operate and improve our business</li><li><strong>Legal obligation</strong> — where required by UAE law or applicable regulations</li></ul>' +
+      '<h3><span class="cm-num">5.</span>Data Retention</h3>' +
+      '<p>We retain your personal data for as long as necessary to fulfill the purposes outlined in this policy, or as required by law. Enquiry data is typically retained for 24 months. You may request deletion at any time.</p>' +
+      '<h3><span class="cm-num">6.</span>Sharing Your Information</h3>' +
+      '<p>We may share your data with:</p>' +
+      '<ul><li>Service providers who help us operate our website and business (email platforms, CRM tools, analytics)</li><li>Professional advisors including lawyers and accountants where necessary</li><li>Authorities where required by law</li></ul>' +
+      '<p>All third-party processors are required to handle your data securely and in accordance with applicable law.</p>' +
+      '<h3><span class="cm-num">7.</span>Cookies</h3>' +
+      '<p>Our website may use cookies and similar tracking technologies to improve your experience. These include:</p>' +
+      '<ul><li>Essential cookies necessary for the site to function</li><li>Analytics cookies to understand how visitors use the site</li></ul>' +
+      '<p>You can control cookies through your browser settings.</p>' +
+      '<h3><span class="cm-num">8.</span>Your Rights</h3>' +
+      '<p>Depending on your location you may have the right to:</p>' +
+      '<ul><li>Access the personal data we hold about you</li><li>Request correction of inaccurate data</li><li>Request deletion of your data</li><li>Object to or restrict processing</li><li>Withdraw consent at any time</li></ul>' +
+      '<p>To exercise any of these rights contact us at <a href="mailto:info@creativemuse.ca">info@creativemuse.ca</a></p>' +
+      '<h3><span class="cm-num">9.</span>International Transfers</h3>' +
+      '<p>We operate from Dubai, UAE. If you are located in the EU, UK, Canada or elsewhere, your data may be transferred to and processed in the UAE. We take appropriate measures to ensure your data remains protected.</p>' +
+      '<h3><span class="cm-num">10.</span>Changes to This Policy</h3>' +
+      '<p>We may update this policy from time to time. We will notify you of significant changes by updating the date at the top of this page.</p>' +
+      '<h3><span class="cm-num">11.</span>Contact Us</h3>' +
+      '<p>Musetech Solutions FZCO trading as Creative Muse Marketing</p>' +
+      '<p>Email: <a href="mailto:info@creativemuse.ca">info@creativemuse.ca</a><br>Website: creativemuse.co<br>Location: Dubai, UAE</p>';
+
+    var termsHTML =
+      '<h2>Terms and Conditions</h2>' +
+      '<div class="cm-modal-dates">Effective Date: June 26, 2026 &nbsp;·&nbsp; Last Updated: June 26, 2026</div>' +
+      '<h3><span class="cm-num">1.</span>About Us</h3>' +
+      '<p>These Terms and Conditions govern your use of the Creative Muse Marketing website at creativemuse.co, operated by Musetech Solutions FZCO, a Free Zone Company registered in Dubai, United Arab Emirates.</p>' +
+      '<p>By accessing or using this website you agree to these terms. If you do not agree, please do not use the site.</p>' +
+      '<h3><span class="cm-num">2.</span>Use of This Website</h3>' +
+      '<p>You may use this website for lawful purposes only. You agree not to:</p>' +
+      '<ul><li>Use the site in any way that violates applicable laws or regulations</li><li>Attempt to gain unauthorized access to any part of the site</li><li>Transmit any harmful, offensive, or disruptive content</li><li>Copy, reproduce, or redistribute our content without written permission</li></ul>' +
+      '<h3><span class="cm-num">3.</span>Intellectual Property</h3>' +
+      '<p>All content on this website including text, graphics, logos, images, and code is the property of Musetech Solutions FZCO or its content suppliers and is protected by applicable intellectual property laws. You may not use our content without prior written permission.</p>' +
+      '<h3><span class="cm-num">4.</span>Services and Enquiries</h3>' +
+      '<p>Submitting a contact form or requesting a free audit does not constitute a binding contract. Any engagement for services will be governed by a separate written agreement between you and Musetech Solutions FZCO.</p>' +
+      '<p>The free SEO audit is provided as a goodwill service. We make no guarantee of specific outcomes from any audit or recommendation.</p>' +
+      '<h3><span class="cm-num">5.</span>Disclaimer of Warranties</h3>' +
+      '<p>This website and its content are provided on an "as is" basis without warranties of any kind, express or implied. We do not warrant that the site will be uninterrupted, error-free, or free of viruses or other harmful components.</p>' +
+      '<h3><span class="cm-num">6.</span>Limitation of Liability</h3>' +
+      '<p>To the fullest extent permitted by law, Musetech Solutions FZCO shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of this website or reliance on any information provided here.</p>' +
+      '<h3><span class="cm-num">7.</span>Third Party Links</h3>' +
+      '<p>Our website may contain links to third party websites. We are not responsible for the content, privacy practices, or terms of those sites. Links do not constitute endorsement.</p>' +
+      '<h3><span class="cm-num">8.</span>Governing Law</h3>' +
+      '<p>These terms are governed by the laws of the United Arab Emirates. Any disputes shall be subject to the exclusive jurisdiction of the courts of Dubai, UAE.</p>' +
+      '<h3><span class="cm-num">9.</span>Changes to These Terms</h3>' +
+      '<p>We reserve the right to update these terms at any time. Continued use of the website after changes constitutes acceptance of the updated terms.</p>' +
+      '<h3><span class="cm-num">10.</span>Contact Us</h3>' +
+      '<p>Musetech Solutions FZCO trading as Creative Muse Marketing</p>' +
+      '<p>Email: <a href="mailto:info@creativemuse.ca">info@creativemuse.ca</a><br>Website: creativemuse.co<br>Location: Dubai, UAE</p>';
+
+    function buildLegalModal(id, inner) {
+      var ov = document.createElement('div');
+      ov.className = 'cm-modal';
+      ov.id = id;
+      ov.innerHTML = '<div class="cm-modal-backdrop"></div><div class="cm-modal-panel" role="dialog" aria-modal="true">' +
+        '<button class="cm-modal-close" aria-label="Close">×</button>' + inner + '</div>';
+      document.body.appendChild(ov);
+      function close() { ov.classList.remove('open'); document.body.classList.remove('cm-modal-lock'); }
+      ov.querySelector('.cm-modal-close').addEventListener('click', close);
+      ov.querySelector('.cm-modal-backdrop').addEventListener('click', close);
+      return ov;
+    }
+    var privacyModal = buildLegalModal('cm-privacy', privacyHTML);
+    var termsModal = buildLegalModal('cm-terms', termsHTML);
+
+    function openLegal(m) {
+      m.classList.add('open');
+      document.body.classList.add('cm-modal-lock');
+      m.querySelector('.cm-modal-panel').scrollTop = 0;
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        privacyModal.classList.remove('open');
+        termsModal.classList.remove('open');
+        document.body.classList.remove('cm-modal-lock');
+      }
+    });
+
+    var legalWatcher = new MutationObserver(function() {
+      var links = document.querySelectorAll('.footer-legal a');
+      if (links.length < 2) return;
+      var allWired = true;
+      links.forEach(function(a) {
+        if (a.getAttribute('data-cm-wired')) return;
+        var t = a.textContent.toLowerCase();
+        if (t.indexOf('privacy') !== -1) {
+          a.setAttribute('data-cm-wired', '1');
+          a.addEventListener('click', function(e) { e.preventDefault(); openLegal(privacyModal); });
+        } else if (t.indexOf('terms') !== -1) {
+          a.setAttribute('data-cm-wired', '1');
+          a.addEventListener('click', function(e) { e.preventDefault(); openLegal(termsModal); });
+        } else { allWired = false; }
+      });
+      links.forEach(function(a) { if (!a.getAttribute('data-cm-wired')) allWired = false; });
+      if (allWired) legalWatcher.disconnect();
+    });
+    legalWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
