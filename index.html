@@ -911,18 +911,26 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Fallback: release locks even if a transitionend never fires.
       setTimeout(function() { clearSrvLocks(svc, cards); }, 150 * cards.length + 600 + 800);
     }
-    // Trigger once #services is revealed (its inline style gains opacity: 1).
+    // Trigger when the CARDS ROW (.services-grid) enters the viewport — fire as
+    // its top reaches 85% of the viewport height (cards just entering from the
+    // bottom), not when the section top does. Cards stay blurred until then.
+    function srvScrollCheck() {
+      if (serviceCardsRevealed) { window.removeEventListener('scroll', srvScrollCheck); return; }
+      var svc = document.getElementById('services');
+      var grid = svc && svc.querySelector('.services-grid');
+      if (!grid) return;
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      if (grid.getBoundingClientRect().top < vh * 0.85) {
+        runServiceStagger(svc);
+        window.removeEventListener('scroll', srvScrollCheck);
+      }
+    }
     var srvSetup = new MutationObserver(function() {
       var svc = document.getElementById('services');
-      if (!svc) return;
+      if (!svc || !svc.querySelector('.services-grid')) return;
       srvSetup.disconnect();
-      var check = function() {
-        if (/opacity:\s*1/.test(svc.getAttribute('style') || '')) { runServiceStagger(svc); return true; }
-        return false;
-      };
-      if (check()) return;
-      var attrObs = new MutationObserver(function() { if (check()) attrObs.disconnect(); });
-      attrObs.observe(svc, { attributes: true, attributeFilter: ['style'] });
+      window.addEventListener('scroll', srvScrollCheck, { passive: true });
+      srvScrollCheck(); // in case the row is already within the trigger band
     });
     srvSetup.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
