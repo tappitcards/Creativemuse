@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Framer, never touches the .cm-fixed pin, and leaves hover/parallax intact.
     var heroCardStyle = document.createElement('style');
     heroCardStyle.textContent =
-      '.hero-cards .result-card{opacity:0;transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1)}' +
+      '.hero-cards .result-card{opacity:0;transition:opacity 1.2s cubic-bezier(0.16,1,0.3,1)}' +
       '.hero-cards .result-card.hero-card-in{opacity:1}';
     document.head.appendChild(heroCardStyle);
 
@@ -837,20 +837,21 @@ document.addEventListener('DOMContentLoaded', async function() {
       heroCardWatcher.disconnect();
       // top (0ms), middle (200ms), bottom (400ms)
       for (var i = 0; i < cards.length; i++) {
-        (function(c, idx) { setTimeout(function() { c.classList.add('hero-card-in'); }, idx * 200); })(cards[i], i);
+        (function(c, idx) { setTimeout(function() { c.classList.add('hero-card-in'); }, idx * 350); })(cards[i], i);
       }
       // safety: never leave a card hidden if a timer is throttled
       setTimeout(function() { for (var k = 0; k < cards.length; k++) cards[k].classList.add('hero-card-in'); }, 3000);
     });
     heroCardWatcher.observe(document.body, { childList: true, subtree: true });
 
-    // ── Animation 2: service cards stagger on first scroll-in (opacity only) ─
-    // .srv-card opacity is Framer-free (Framer drives tilt/hover transform and
-    // the wrapper handles its own reveal), so this composes cleanly.
+    // ── Animation 2: service cards stagger on first scroll-in (blur only) ────
+    // Uses filter:blur (NOT opacity) so it never touches Framer's opacity/
+    // transform hover state. The revealed state is applied as an INLINE filter
+    // (not a class) because SpotlightCard re-renders on hover (setLit) and would
+    // strip any injected class — which is what blanked the cards before. React/
+    // Framer don't manage `filter`, so the inline value survives hover.
     var srvCardStyle = document.createElement('style');
-    srvCardStyle.textContent =
-      '.srv-card{opacity:0;transition:opacity 0.6s ease}' +
-      '.srv-card.card-visible{opacity:1}';
+    srvCardStyle.textContent = '.srv-card{filter:blur(6px);transition:filter 0.6s ease}';
     document.head.appendChild(srvCardStyle);
 
     var serviceCardsRevealed = false;
@@ -860,7 +861,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (!cards.length) return;
       serviceCardsRevealed = true;
       for (var i = 0; i < cards.length; i++) {
-        (function(c, idx) { setTimeout(function() { c.classList.add('card-visible'); }, idx * 150); })(cards[i], i);
+        (function(c, idx) { setTimeout(function() { c.style.filter = 'blur(0px)'; }, idx * 150); })(cards[i], i);
       }
     }
     // Trigger once #services is revealed (its inline style gains opacity: 1).
