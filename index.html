@@ -818,6 +818,67 @@ document.addEventListener('DOMContentLoaded', async function() {
     legalWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
+    // ── Animation 1: hero cards fall in sequence on load (opacity only) ──────
+    // Framer controls the WRAPPER opacity/transform; the inner .result-card
+    // opacity is free, so an opacity-only sequence here never conflicts with
+    // Framer, never touches the .cm-fixed pin, and leaves hover/parallax intact.
+    var heroCardStyle = document.createElement('style');
+    heroCardStyle.textContent =
+      '.hero-cards .result-card{opacity:0;transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1)}' +
+      '.hero-cards .result-card.hero-card-in{opacity:1}';
+    document.head.appendChild(heroCardStyle);
+
+    var heroCardsRevealed = false;
+    var heroCardWatcher = new MutationObserver(function() {
+      if (heroCardsRevealed) { heroCardWatcher.disconnect(); return; }
+      var cards = document.querySelectorAll('.hero-cards .result-card');
+      if (cards.length < 3) return;
+      heroCardsRevealed = true;
+      heroCardWatcher.disconnect();
+      // top (0ms), middle (200ms), bottom (400ms)
+      for (var i = 0; i < cards.length; i++) {
+        (function(c, idx) { setTimeout(function() { c.classList.add('hero-card-in'); }, idx * 200); })(cards[i], i);
+      }
+      // safety: never leave a card hidden if a timer is throttled
+      setTimeout(function() { for (var k = 0; k < cards.length; k++) cards[k].classList.add('hero-card-in'); }, 3000);
+    });
+    heroCardWatcher.observe(document.body, { childList: true, subtree: true });
+
+    // ── Animation 2: service cards stagger on first scroll-in (opacity only) ─
+    // .srv-card opacity is Framer-free (Framer drives tilt/hover transform and
+    // the wrapper handles its own reveal), so this composes cleanly.
+    var srvCardStyle = document.createElement('style');
+    srvCardStyle.textContent =
+      '.srv-card{opacity:0;transition:opacity 0.6s ease}' +
+      '.srv-card.card-visible{opacity:1}';
+    document.head.appendChild(srvCardStyle);
+
+    var serviceCardsRevealed = false;
+    function runServiceStagger() {
+      if (serviceCardsRevealed) return;
+      var cards = document.querySelectorAll('#services .srv-card');
+      if (!cards.length) return;
+      serviceCardsRevealed = true;
+      for (var i = 0; i < cards.length; i++) {
+        (function(c, idx) { setTimeout(function() { c.classList.add('card-visible'); }, idx * 150); })(cards[i], i);
+      }
+    }
+    // Trigger once #services is revealed (its inline style gains opacity: 1).
+    var srvSetup = new MutationObserver(function() {
+      var svc = document.getElementById('services');
+      if (!svc) return;
+      srvSetup.disconnect();
+      var check = function() {
+        if (/opacity:\s*1/.test(svc.getAttribute('style') || '')) { runServiceStagger(); return true; }
+        return false;
+      };
+      if (check()) return;
+      var attrObs = new MutationObserver(function() { if (check()) attrObs.disconnect(); });
+      attrObs.observe(svc, { attributes: true, attributeFilter: ['style'] });
+    });
+    srvSetup.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
