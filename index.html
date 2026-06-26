@@ -443,6 +443,37 @@ document.addEventListener('DOMContentLoaded', async function() {
       aboutCardWatcher.disconnect();
     });
     aboutCardWatcher.observe(document.body, { childList: true, subtree: true });
+
+    // Hardening: force every node in the About body paragraphs (excluding the
+    // gold .lead quote) to the uniform body color via inline !important — this
+    // neutralizes any "scroll accent"/highlight mechanism that wraps words in
+    // colored spans, even if it sets inline color with !important (which CSS
+    // alone cannot override). A childList observer re-applies it if such spans
+    // are injected after scroll/in-view.
+    function hardenAboutBody() {
+      var about = document.getElementById('about');
+      if (!about) return false;
+      var paras = about.querySelectorAll('.about-narrative p:not(.lead)');
+      if (!paras.length) return false;
+      for (var i = 0; i < paras.length; i++) {
+        paras[i].style.setProperty('color', 'var(--ink-2)', 'important');
+        var kids = paras[i].querySelectorAll('*');
+        for (var j = 0; j < kids.length; j++) kids[j].style.setProperty('color', 'var(--ink-2)', 'important');
+      }
+      return true;
+    }
+    var aboutHardenWatcher = new MutationObserver(function() {
+      var about = document.getElementById('about');
+      var narrative = about && about.querySelector('.about-narrative');
+      if (!narrative) return;
+      hardenAboutBody();
+      aboutHardenWatcher.disconnect();
+      // keep watching the narrative itself so late-injected colored spans are
+      // re-neutralized (static text doesn't mutate, so this stays cheap).
+      var live = new MutationObserver(function() { hardenAboutBody(); });
+      live.observe(narrative, { childList: true, subtree: true });
+    });
+    aboutHardenWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
     var udWatcher = new MutationObserver(function() {
