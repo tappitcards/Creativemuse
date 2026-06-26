@@ -647,18 +647,33 @@ document.addEventListener('DOMContentLoaded', async function() {
     ].join('');
     document.head.appendChild(reviewsStyle);
 
-    // ── Contact: strip flag emojis from the offices line ─────────────────────
+    // ── Strip flag emojis: Contact offices line + footer links ───────────────
+    var FLAG_TEST = /[\uD83C][\uDDE6-\uDDFF]/;
     var contactFlagWatcher = new MutationObserver(function() {
+      var contactDone = false, footerDone = false;
+      // Contact offices line
       var contact = document.getElementById('contact');
-      if (!contact) return;
-      var vals = contact.querySelectorAll('.contact-detail-val');
-      for (var i = 0; i < vals.length; i++) {
-        if (/Dubai/.test(vals[i].textContent) && /[\uD83C][\uDDE6-\uDDFF]/.test(vals[i].textContent)) {
-          vals[i].textContent = 'Dubai, UAE · Canada';
-          contactFlagWatcher.disconnect();
-          return;
+      if (contact) {
+        var vals = contact.querySelectorAll('.contact-detail-val');
+        for (var i = 0; i < vals.length; i++) {
+          if (/Dubai/.test(vals[i].textContent)) {
+            if (FLAG_TEST.test(vals[i].textContent)) vals[i].textContent = 'Dubai, UAE · Canada';
+            contactDone = true;
+          }
         }
       }
+      // Footer "Dubai, UAE" / "Canada" links
+      var footer = document.querySelector('footer');
+      if (footer) {
+        var links = footer.querySelectorAll('a');
+        for (var j = 0; j < links.length; j++) {
+          if (FLAG_TEST.test(links[j].textContent)) {
+            links[j].textContent = links[j].textContent.replace(/[\uD83C][\uDDE6-\uDDFF]/g, '').replace(/\s+$/, '');
+          }
+        }
+        footerDone = true;
+      }
+      if (contactDone && footerDone) contactFlagWatcher.disconnect();
     });
     contactFlagWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
