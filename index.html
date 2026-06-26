@@ -622,6 +622,42 @@ document.addEventListener('DOMContentLoaded', async function() {
     ventWatcher.observe(document.body, { childList: true, subtree: true });
     // ────────────────────────────────────────────────────────────────────────
 
+    // ── Reviews: gold stars + staggered card entrance ────────────────────────
+    // .rev-card is a plain div (not Framer), so the stagger is safe. The marquee
+    // transform lives on the parent .rev-track, so per-card opacity/translateY
+    // compose cleanly with it.
+    var reviewsStyle = document.createElement('style');
+    reviewsStyle.textContent = [
+      // Fix 1: star fill gold instead of red/orange
+      '#reviews .rev-stars-fill{color:#C9A84C}',
+      // Fix 2: staggered fade-up entrance on reveal
+      '#reviews .rev-card{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}',
+      '#reviews.is-visible .rev-card,#reviews[style*="opacity: 1"] .rev-card{opacity:1;transform:translateY(0)}',
+      '#reviews[style*="opacity: 1"] .rev-card:nth-child(1){transition-delay:0.1s}',
+      '#reviews[style*="opacity: 1"] .rev-card:nth-child(2){transition-delay:0.2s}',
+      '#reviews[style*="opacity: 1"] .rev-card:nth-child(3){transition-delay:0.3s}',
+      '#reviews[style*="opacity: 1"] .rev-card:nth-child(4){transition-delay:0.4s}',
+      '#reviews[style*="opacity: 1"] .rev-card:nth-child(5){transition-delay:0.5s}',
+      '#reviews[style*="opacity: 1"] .rev-card:nth-child(n+6){transition-delay:0.5s}',
+    ].join('');
+    document.head.appendChild(reviewsStyle);
+
+    // ── Contact: strip flag emojis from the offices line ─────────────────────
+    var contactFlagWatcher = new MutationObserver(function() {
+      var contact = document.getElementById('contact');
+      if (!contact) return;
+      var vals = contact.querySelectorAll('.contact-detail-val');
+      for (var i = 0; i < vals.length; i++) {
+        if (/Dubai/.test(vals[i].textContent) && /[\uD83C][\uDDE6-\uDDFF]/.test(vals[i].textContent)) {
+          vals[i].textContent = 'Dubai, UAE · Canada';
+          contactFlagWatcher.disconnect();
+          return;
+        }
+      }
+    });
+    contactFlagWatcher.observe(document.body, { childList: true, subtree: true });
+    // ────────────────────────────────────────────────────────────────────────
+
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);
