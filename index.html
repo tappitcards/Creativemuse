@@ -395,12 +395,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     // ── About visual enhancements ────────────────────────────────────────────
     var aboutStyle = document.createElement('style');
     aboutStyle.textContent = [
+      // Fix 1: force uniform body text — strip any stray colored word highlights
+      // (excludes the .lead quote). Bulletproof against accent spans.
+      '#about .about-narrative p:not(.lead),#about .about-narrative p:not(.lead) *{color:var(--ink-2)!important}',
       // Gold top line per right-side card (injected real div, since .about-card
-      // is a Framer SpotlightCard). Draws 0->100% when About reveals.
-      '#about .about-card-line{width:0%;height:2px;background:linear-gradient(90deg,#C9A84C,transparent);transition:width 0.8s cubic-bezier(0.16,1,0.3,1);margin-bottom:20px}',
-      '#about.is-visible .about-card-line,#about[style*="opacity: 1"] .about-card-line{width:100%}',
-      // Italic quote becomes the gold visual anchor
+      // is a Framer SpotlightCard). Draws 0->100% when About reveals (1.4s).
+      '#about .about-card-line{width:0%;height:2px;background:linear-gradient(90deg,#C9A84C,transparent);transition:width 1.4s cubic-bezier(0.16,1,0.3,1);margin-bottom:20px}',
+      '#about[style*="opacity: 1"] .about-card-line{width:100%}',
+      // Fix 2: italic quote + eyebrow label in warm gold #C9A84C
       '#about .about-narrative .lead{color:#C9A84C}',
+      '#about .eyebrow{color:#C9A84C}',
+      '#about .eyebrow::before{background:#C9A84C}',
       // Thin vertical gold separator between the left text and right cards
       '#about .about-inner{position:relative}',
       '#about .about-inner::after{content:"";position:absolute;top:10%;bottom:10%;left:50%;width:1px;background:linear-gradient(180deg,transparent,rgba(201,168,76,0.3),transparent);pointer-events:none}',
@@ -413,12 +418,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (!about) return;
       var cards = about.querySelectorAll('.about-card');
       if (cards.length < 3) return;
-      var delays = ['0.1s', '0.25s', '0.4s'];
+      var delays = ['0.2s', '0.45s', '0.7s'];
       for (var i = 0; i < cards.length; i++) {
         if (!cards[i].querySelector('.about-card-line')) {
           var ln = document.createElement('div');
           ln.className = 'about-card-line';
-          ln.style.transitionDelay = delays[i] || '0.4s';
+          ln.style.transitionDelay = delays[i] || '0.7s';
           cards[i].insertBefore(ln, cards[i].firstChild);
         }
       }
