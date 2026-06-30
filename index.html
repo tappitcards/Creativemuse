@@ -161,7 +161,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // (#trusted-by is excluded; the logos blur fade is handled separately.)
     var preHideStyle = document.createElement('style');
     preHideStyle.textContent = [
-      '#about,#services,#clients,#seo-audit,#reviews,#contact{opacity:0}',
+      // GPU-composite hidden sections from first paint (avoids the first-scroll
+      // compositing promotion stall on mobile). will-change is cleared per
+      // section once its entrance transition finishes.
+      '#about,#services,#clients,#seo-audit,#reviews,#contact{opacity:0;will-change:transform,opacity}',
       // About — slide in from left
       '#about{transform:translateX(-60px);transition:opacity 1.2s cubic-bezier(0.16,1,0.3,1),transform 1.2s cubic-bezier(0.16,1,0.3,1)}',
       // Services — scale up from slightly small
@@ -177,12 +180,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     ].join('');
     document.head.appendChild(preHideStyle);
 
+    // Save the NATIVE window.scrollTo BEFORE the bundle exports its own
+    // scrollTo(id) over it (muse-fx assigns scrollTo to window). Needed to
+    // repair the self-recursion bug below.
+    var __nativeScrollTo = window.scrollTo.bind(window);
+
     // ── Disable Lenis smooth-scroll on touch / small screens ────────────────
     // Lenis fights native momentum scrolling on mobile (scroll stops mid-flick
     // and needs a second swipe). useLenis() bails out when window.Lenis is
     // absent, so removing it before React mounts keeps Lenis on desktop only and
-    // lets touch devices use native scrolling. scrollTo() already falls back to
-    // native window.scrollTo when window.__lenis is null, so anchors still work.
+    // lets touch devices use native scrolling.
     var isTouchDevice = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth < 768;
     if (isTouchDevice) {
       window.Lenis = undefined;
@@ -195,6 +202,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
       window.Babel.transformScriptTags();
     }
+
+    // ── Repair window.scrollTo recursion (Bug: SyntaxError on anchor click) ──
+    // The bundle's scrollTo(id) is exported to window.scrollTo; with Lenis off
+    // its fallback calls window.scrollTo({top,behavior}) — i.e. itself with an
+    // object — so querySelector receives "[object Object]" and throws. Wrap
+    // window.scrollTo so object/coordinate calls go to the saved native scroll,
+    // while string calls still resolve a selector. Nav/CTA anchors now scroll
+    // natively on touch with no error; desktop Lenis is unaffected (it uses the
+    // __lenis path and never hits this fallback).
+    window.scrollTo = function(arg) {
+      if (typeof arg === 'string') {
+        var el = document.querySelector(arg);
+        if (el) __nativeScrollTo({ top: el.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0), behavior: 'smooth' });
+        return;
+      }
+      return __nativeScrollTo.apply(window, arguments);
+    };
 
     // ── Hero scroll reveal ──────────────────────────────────────────────────
     // Inject CSS into the new document's head.
@@ -316,33 +340,41 @@ document.addEventListener('DOMContentLoaded', async function() {
       };
 
       function checkSections() {
+        var vh = window.innerHeight || document.documentElement.clientHeight;
         sections.forEach(function(el) {
           if (el.style.opacity === '1') return;
           var rect = el.getBoundingClientRect();
           // Trigger when section top reaches 40% from bottom of viewport
-          if (rect.top < window.innerHeight * 0.6) {
+          if (rect.top < vh * 0.6) {
             el.style.opacity = '1';
             el.style.transform = END[el.id] || 'none';
-            // About & Services: once the reveal finishes, clear the residual
-            // transform so the container stops being its own composited layer —
-            // otherwise the persistent transform freezes child card whileHover
-            // repaint (stuck hero/service card hover after first interaction).
-            if (el.id === 'about' || el.id === 'services') {
-              (function(node) {
-                var clear = function(ev) {
-                  if (ev.target !== node || ev.propertyName !== 'transform') return;
-                  node.style.transform = 'none';
-                  node.style.willChange = 'auto';
-                  node.removeEventListener('transitionend', clear);
-                };
-                node.addEventListener('transitionend', clear);
-              })(el);
-            }
+            // Once the entrance completes, drop the residual transform +
+            // will-change so the container is no longer its own composited layer.
+            // This frees descendant card whileHover repaint AND avoids the
+            // first-scroll compositing stall on mobile.
+            (function(node) {
+              var clear = function(ev) {
+                if (ev.target !== node || ev.propertyName !== 'transform') return;
+                node.style.transform = 'none';
+                node.style.willChange = 'auto';
+                node.removeEventListener('transitionend', clear);
+              };
+              node.addEventListener('transitionend', clear);
+            })(el);
           }
         });
       }
 
-      window.addEventListener('scroll', checkSections, { passive: true });
+      // rAF-throttled passive scroll handler — never do the 6 getBoundingClientRect
+      // layout reads synchronously on the scroll thread (fixes the first-scroll
+      // stutter where the initial scroll event did too much work at once).
+      var rafPending = false;
+      function onScroll() {
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(function() { rafPending = false; checkSections(); });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
       checkSections();
     }
 
@@ -918,17 +950,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     // applying after reveal; the per-card reveal sets an INLINE filter:blur(0).
     // Once every card finishes, we add .srv-revealed (base rule off) AND clear
     // the inline filter — leaving NO filter at all so Framer fully owns hover.
+    // Desktop uses filter:blur; touch/mobile uses the lighter opacity (blur is
+    // expensive on mobile GPUs and can stall the first reveal frame). Both are
+    // applied as INLINE styles per card (survive SpotlightCard's hover re-render)
+    // and fully cleared on release so Framer owns hover. opacity/filter never
+    // collide with Framer's transform-based tilt/spotlight.
+    var SRV_PROP = isTouchDevice ? 'opacity' : 'filter';
+    var SRV_HIDDEN = isTouchDevice ? '0' : 'blur(6px)';
+    var SRV_SHOWN = isTouchDevice ? '1' : 'blur(0px)';
     var srvCardStyle = document.createElement('style');
-    srvCardStyle.textContent = '#services:not(.srv-revealed) .srv-card{filter:blur(6px);transition:filter 0.6s ease}';
+    srvCardStyle.textContent = '#services:not(.srv-revealed) .srv-card{' + SRV_PROP + ':' + SRV_HIDDEN + ';transition:' + SRV_PROP + ' 0.6s ease}';
     document.head.appendChild(srvCardStyle);
 
     var serviceCardsRevealed = false, srvCleared = false;
     function clearSrvLocks(svc, cards) {
       if (srvCleared) return;
       srvCleared = true;
-      svc.classList.add('srv-revealed'); // base blur rule no longer applies
+      svc.classList.add('srv-revealed'); // base hidden rule no longer applies
       for (var k = 0; k < cards.length; k++) {
-        cards[k].style.filter = '';
+        cards[k].style[SRV_PROP] = '';
         cards[k].style.transition = '';
         cards[k].style.willChange = '';
       }
@@ -942,9 +982,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       for (var i = 0; i < cards.length; i++) {
         (function(c, idx) {
           setTimeout(function() {
-            c.style.filter = 'blur(0px)';
+            c.style[SRV_PROP] = SRV_SHOWN;
             var onEnd = function(e) {
-              if (e.target !== c || e.propertyName !== 'filter') return;
+              if (e.target !== c || e.propertyName !== SRV_PROP) return;
               c.removeEventListener('transitionend', onEnd);
               if (++done >= cards.length) clearSrvLocks(svc, cards);
             };
